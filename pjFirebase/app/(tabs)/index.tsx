@@ -1,28 +1,29 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebaseConfig"; // Certifique-se de configurar corretamente o firebase
+import { useRouter } from "expo-router"; // Importando useRouter
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const router = useRouter();
+
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Login bem-sucedido, navegue para a Home
-        navigation.navigate("home"); // A navegação aqui será automática
+        navigation.push("home"); // Usando push para empurrar a tela na pilha
       })
       .catch((error) => {
         Alert.alert("Erro", error.message);
       });
+  };
+
+  const handleAnotherAction = () => {
+    // Navegar para outra tela usando push
+    router.push("/screens/SignUpScreen"); // Substitua "OutraTela" pela tela desejada
   };
 
   return (
@@ -47,8 +48,11 @@ const LoginScreen = ({ navigation }) => {
       >
         <Text className="text-white text-center">Entrar</Text>
       </TouchableOpacity>
-      <TouchableOpacity className="w-full h-16 bg-primary">
-        <Text className="text-white font-pbold bg-black"> OOOI</Text>
+      <TouchableOpacity
+        className="w-full h-16 bg-primary"
+        onPress={handleAnotherAction} // Chama a função de navegação para outra tela
+      >
+        <Text className="text-white font-pbold bg-black">OOOI</Text>
       </TouchableOpacity>
     </View>
   );
