@@ -27,7 +27,7 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View className="flex-1 justify-center p-5">
+    <View className="flex-1 justify-center p-5 bg-primary">
       <Text className="text-2xl font-bold text-center mb-5">Login</Text>
       <TextInput
         className="border border-gray-300 mb-4 p-2 rounded"
@@ -49,10 +49,10 @@ const LoginScreen = ({ navigation }) => {
         <Text className="text-white text-center">Entrar</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="w-full h-16 bg-primary"
-        onPress={handleAnotherAction} // Chama a função de navegação para outra tela
+        className="w-full h-16"
+        onPress={() => router.push("/screens/SignUpScreen")} // Chama a função de navegação para outra tela
       >
-        <Text className="text-white font-pbold bg-black">OOOI</Text>
+        <Text className="text-white font-pbold bg-secondary">OOOI</Text>
       </TouchableOpacity>
     </View>
   );

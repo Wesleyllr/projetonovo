@@ -1,10 +1,5 @@
-// firebaseConfig.js
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  browserLocalPersistence,
-  setPersistence,
-} from "firebase/auth";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
@@ -19,13 +14,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Inicializa a autenticação
-const auth = getAuth(app);
-
-// Configura a persistência com AsyncStorage
-setPersistence(auth, browserLocalPersistence) // ou outro tipo de persistência adequado
-  .catch((error) => {
-    console.error("Error setting persistence: ", error);
-  });
+// Inicializa o Auth com persistência
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 
 export { auth };

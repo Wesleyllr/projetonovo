@@ -1,15 +1,19 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, Button } from "react-native";
+import { useRouter } from "expo-router";
 
-export default function HomeScreen() {
+const HomeScreen = () => {
+  const router = useRouter();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Bem-vindo à Home!</Text>
+    <View>
+      <Text>Bem-vindo à Home!</Text>
+      <Button
+        title="Ir para Cadastro"
+        onPress={() => router.push("/screens/SignUpScreen")}
+      />
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, fontWeight: "bold" },
-});
+export default HomeScreen;
