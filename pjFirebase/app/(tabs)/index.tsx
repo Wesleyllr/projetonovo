@@ -1,61 +1,44 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebaseConfig"; // Certifique-se de configurar corretamente o firebase
-import { useRouter } from "expo-router"; // Importando useRouter
+import React, { useEffect } from "react";
+import { View, Text, ActivityIndicator, Image } from "react-native";
+import { useRouter } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/firebaseConfig"; // Certifique-se de que o Firebase está configurado corretamente
+import { Platform } from "react-native";
+import { images } from "@/constants";
 
-const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+const IndexScreen = () => {
   const router = useRouter();
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Login bem-sucedido, navegue para a Home
-        navigation.push("home"); // Usando push para empurrar a tela na pilha
-      })
-      .catch((error) => {
-        Alert.alert("Erro", error.message);
-      });
-  };
+  useEffect(() => {
+    // Verifica o estado de autenticação assim que o componente for montado
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Usuário autenticado, redireciona para a HomeScreen
+        router.push("/screens/HomeScreen");
+      } else {
+        // Usuário não autenticado, redireciona para a SignUpScreen
+        router.push("/screens/SignUpScreen");
+      }
+    });
 
-  const handleAnotherAction = () => {
-    // Navegar para outra tela usando push
-    router.push("/screens/SignUpScreen"); // Substitua "OutraTela" pela tela desejada
-  };
+    // Limpa o ouvinte quando o componente for desmontado
+    return () => unsubscribe();
+  }, [router]);
 
   return (
-    <View className="flex-1 justify-center p-5 bg-primary">
-      <Text className="text-2xl font-bold text-center mb-5">Login</Text>
-      <TextInput
-        className="border border-gray-300 mb-4 p-2 rounded"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+    <View className="flex-1 justify-center items-center bg-white">
+      <Image
+        source={images.moovcolumblue}
+        resizeMode="contain"
+        className="w-60 h-20"
       />
-      <TextInput
-        className="border border-gray-300 mb-4 p-2 rounded"
-        placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity
-        className="bg-blue-500 p-3 rounded"
-        onPress={handleLogin}
-      >
-        <Text className="text-white text-center">Entrar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        className="w-full h-16"
-        onPress={() => router.push("/screens/SignUpScreen")} // Chama a função de navegação para outra tela
-      >
-        <Text className="text-white font-pbold bg-secondary">OOOI</Text>
-      </TouchableOpacity>
+      <Text className="text-2xl font-bold text-center">Seja bem vindo!</Text>
+      <Text className="text-2xl font-bold text-center">
+        Estamos verificando o Login...
+      </Text>
+      <ActivityIndicator size="large" color="#0000ff" />
     </View>
   );
 };
 
-export default LoginScreen;
+export default IndexScreen;

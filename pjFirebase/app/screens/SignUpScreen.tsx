@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, Button, Alert } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebaseConfig"; // Certifique-se de configurar corretamente o Firebase
+import FormField from "@/components/FormField";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -48,23 +50,24 @@ const SignUpScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Cadastro</Text>
+    <SafeAreaView className="flex-1 justify-center p-5 bg-primaria">
+      <Text className="text-2xl font-bold text-center mb-5">Cadastro</Text>
       <TextInput
-        style={styles.input}
+        className="border border-gray-300 mb-4 p-2 rounded"
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
       />
+
       <TextInput
-        style={styles.input}
+        className="border border-gray-300 mb-4 p-2 rounded"
         placeholder="Senha"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
       <TextInput
-        style={styles.input}
+        className="border border-gray-300 mb-4 p-2 rounded"
         placeholder="Confirmar Senha"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -75,25 +78,9 @@ const SignUpScreen = ({ navigation }) => {
         onPress={handleSignUp}
         disabled={loading} // Desabilita o botão enquanto está carregando
       />
-    </View>
+      <FormField title="login" />
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    marginBottom: 15,
-    padding: 10,
-    borderRadius: 5,
-  },
-});
 
 export default SignUpScreen;
