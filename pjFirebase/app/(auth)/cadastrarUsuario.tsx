@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
+import { View, Text, TextInput, Button, Alert, Platform } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebaseConfig"; // Certifique-se de configurar corretamente o Firebase
 import FormField from "@/components/FormField";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const SignUpScreen = ({ navigation }) => {
+const Cadastro = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,35 +52,41 @@ const SignUpScreen = ({ navigation }) => {
   return (
     <SafeAreaView className="flex-1 justify-center p-5 bg-primaria">
       <Text className="text-2xl font-bold text-center mb-5">Cadastro</Text>
-      <TextInput
-        className="border border-gray-300 mb-4 p-2 rounded"
-        placeholder="Email"
+
+
+      <FormField
+        title="Email"
         value={email}
-        onChangeText={setEmail}
+        handleChangeText={(e) => setEmail(e)}
+        keyboardType="email-address"
+        otherStyles={`mt-7 w-full ${
+          Platform.OS === "web" ? "max-w-[400px]" : ""
+        }`}
+      />
+      <FormField
+        title="Senha"
+        value={password}
+        handleChangeText={(e) => setPassword(e)}
+        otherStyles={`mt-7 w-full ${
+          Platform.OS === "web" ? "max-w-[400px]" : ""
+        }`}
+      />
+      <FormField
+        title="Confirmar senha"
+        value={confirmPassword}
+        handleChangeText={(e) => setConfirmPassword(e)}
+        otherStyles={`mt-7 w-full ${
+          Platform.OS === "web" ? "max-w-[400px]" : ""
+        }`}
       />
 
-      <TextInput
-        className="border border-gray-300 mb-4 p-2 rounded"
-        placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        className="border border-gray-300 mb-4 p-2 rounded"
-        placeholder="Confirmar Senha"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
       <Button
         title={loading ? "Cadastrando..." : "Cadastrar"}
         onPress={handleSignUp}
         disabled={loading} // Desabilita o botão enquanto está carregando
       />
-      <FormField title="login" />
     </SafeAreaView>
   );
 };
 
-export default SignUpScreen;
+export default Cadastro;

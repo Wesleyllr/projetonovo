@@ -6,17 +6,17 @@ export default function ScreensLayout() {
     <Stack>
       {/* Defina a tela de cadastro */}
       <Stack.Screen
-        name="SignUpScreen"
+        name="cadastrarUsuario"
         options={{
           title: "Cadastro",
           headerShown: false, // Mostra o cabeçalho para a tela de cadastro
         }}
       />
       {/* Defina a tela de login */}
-      <Stack.Screen
-        name="HomeScreen"
+            <Stack.Screen
+        name="login"
         options={{
-          title: "Home",
+          title: "Login",
           headerShown: false, // Mostra o cabeçalho para a tela home
         }}
       />

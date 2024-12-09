@@ -41,11 +41,11 @@ const FormField: React.FC<FormFieldProps> = ({
               placeholderTextColor="#7b7b8b"
               onChangeText={handleChangeText}
               secureTextEntry={
-                (title === "Password" || title === "Senha") && !showPassword
+                (title === "Password" || title === "Senha" || title === "Confirmar senha") && !showPassword
               }
               keyboardType={keyboardType}
             />
-            {(title === "Password" || title === "Senha") && (
+            {(title === "Password" || title === "Senha" || title === "Confirmar senha") && (
               <TouchableOpacity
                 onPress={() => setShowPassword((prev) => !prev)}
               >

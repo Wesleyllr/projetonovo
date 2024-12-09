@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import { auth } from "@/firebaseConfig"; // Certifique-se de importar a configuração correta
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const HomeScreen = () => {
+const Home = () => {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
@@ -14,7 +14,7 @@ const HomeScreen = () => {
     signOut(auth)
       .then(() => {
         Alert.alert("Sucesso", "Você foi deslogado.");
-        router.push("/screens/LoginScreen"); // Redireciona para a tela de login
+        router.push("/login"); // Redireciona para a tela de login
       })
       .catch((error) => {
         Alert.alert("Erro", error.message);
@@ -28,7 +28,7 @@ const HomeScreen = () => {
       setUserEmail(user.email); // Obtém o email do usuário logado
     } else {
       // Caso o usuário não esteja logado, redireciona para o login
-      router.push("/screens/SignUpScreen");
+      router.push("/cadastrarUsuario");
     }
   }, [router]);
 
@@ -51,4 +51,4 @@ const HomeScreen = () => {
   );
 };
 
-export default HomeScreen;
+export default Home;

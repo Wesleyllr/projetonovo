@@ -6,7 +6,7 @@ import { useRouter } from "expo-router"; // Importando useRouter
 import FormField from "@/components/FormField";
 import { Platform } from "react-native";
 
-const LoginScreen = () => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -16,7 +16,7 @@ const LoginScreen = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Login bem-sucedido, navegue para a Home
-        router.push("/screens/HomeScreen"); // Usando push para empurrar a tela na pilha
+        router.push("/home"); // Usando push para empurrar a tela na pilha
       })
       .catch((error) => {
         Alert.alert("Erro", error.message);
@@ -25,7 +25,7 @@ const LoginScreen = () => {
 
   const handleAnotherAction = () => {
     // Navegar para outra tela usando push
-    router.push("/screens/SignUpScreen"); // Substitua "OutraTela" pela tela desejada
+    router.push("/cadastrarUsuario"); // Substitua "OutraTela" pela tela desejada
   };
 
   return (
@@ -57,12 +57,12 @@ const LoginScreen = () => {
       </TouchableOpacity>
       <TouchableOpacity
         className="w-full h-16"
-        onPress={() => router.push("/screens/SignUpScreen")} // Chama a função de navegação para outra tela
+        onPress={() => router.push("/home")} // Chama a função de navegação para outra tela
       >
-        <Text className="text-white font-pbold bg-secondary">OOOI</Text>
+        <Text className="text-secundario font-pbold bg-secondary">cadastrar</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default LoginScreen;
+export default Login;
