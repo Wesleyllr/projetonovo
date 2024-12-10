@@ -1,12 +1,13 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text } from "react-native";
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Criar = () => {
   return (
-    <View>
+    <SafeAreaView className="flex-1 bg-primaria">
       <Text>Criar</Text>
-    </View>
-  )
-}
+    </SafeAreaView>
+  );
+};
 
-export default Criar
+export default Criar;

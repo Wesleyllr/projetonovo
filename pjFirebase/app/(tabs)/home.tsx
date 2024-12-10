@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Button, Alert, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Alert, TouchableOpacity } from "react-native";
 import { signOut } from "firebase/auth";
-
 import { useRouter } from "expo-router";
 import { auth } from "@/firebaseConfig"; // Certifique-se de importar a configuração correta
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getUserInfo } from "@/userService"; // Importando o serviço
 
 const Home = () => {
   const router = useRouter();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<string | null>(null);
 
   const handleLogout = () => {
     signOut(auth)
@@ -21,24 +21,16 @@ const Home = () => {
       });
   };
 
-  useEffect(() => {
-    // Verifica se o usuário está logado e, se estiver, pega o email
-    const user = auth.currentUser;
-    if (user) {
-      setUserEmail(user.email); // Obtém o email do usuário logado
-    } else {
-      // Caso o usuário não esteja logado, redireciona para o login
-      router.push("/cadastrarUsuario");
-    }
-  }, [router]);
+  // Buscar a informação diretamente na renderização (não recomendado)
+  const username = getUserInfo("username"); // O que é buscado no serviço
 
   return (
     <SafeAreaView className="flex-1 bg-primaria">
       <Text>Bem-vindo!</Text>
-      {userEmail ? (
-        <Text>Email do usuário: {userEmail}</Text>
+      {username ? (
+        <Text>Username do usuário: {username}</Text>
       ) : (
-        <Text>Carregando o email...</Text>
+        <Text>Carregando o username...</Text>
       )}
 
       <TouchableOpacity

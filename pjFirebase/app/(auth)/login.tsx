@@ -5,6 +5,7 @@ import { auth } from "@/firebaseConfig"; // Certifique-se de configurar corretam
 import { useRouter } from "expo-router"; // Importando useRouter
 import FormField from "@/components/FormField";
 import { Platform } from "react-native";
+import CustomAlert from "@/components/CustomAlert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -59,7 +60,9 @@ const Login = () => {
         className="w-full h-16"
         onPress={() => router.push("/home")} // Chama a função de navegação para outra tela
       >
-        <Text className="text-secundario font-pbold bg-secondary">cadastrar</Text>
+        <Text className="text-secundario font-pbold bg-secondary">
+          cadastrar
+        </Text>
       </TouchableOpacity>
     </View>
   );

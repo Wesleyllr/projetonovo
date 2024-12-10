@@ -1,12 +1,13 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text } from "react-native";
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Vender = () => {
   return (
-    <View>
+    <SafeAreaView className="flex-1 bg-primaria">
       <Text>Vender</Text>
-    </View>
-  )
-}
+    </SafeAreaView>
+  );
+};
 
-export default Vender
+export default Vender;

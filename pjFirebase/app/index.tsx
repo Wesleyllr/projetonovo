@@ -14,10 +14,10 @@ const IndexScreen = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // Usuário autenticado, redireciona para a HomeScreen
-        router.push("/(tabs)/home");
+        router.replace("/(tabs)/home");
       } else {
         // Usuário não autenticado, redireciona para a LoginScreen
-        router.push("/(auth)/login");
+        router.replace("/(auth)/login");
       }
     });
 

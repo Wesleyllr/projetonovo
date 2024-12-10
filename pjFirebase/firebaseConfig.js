@@ -4,6 +4,7 @@ import {
   browserLocalPersistence,
   getReactNativePersistence,
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore"; // Importa o Firestore
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native"; // Importa Platform
 
@@ -29,4 +30,7 @@ const auth = initializeAuth(app, {
     : getReactNativePersistence(AsyncStorage),
 });
 
-export { auth };
+// Inicializa o Firestore
+const db = getFirestore(app);
+
+export { auth, db }; // Exporta tanto o Auth quanto o Firestore
