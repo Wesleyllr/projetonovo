@@ -9,6 +9,7 @@ import moovcolumblue from "../assets/images/moovcolumblue.png";
 import moovcolumbluesmall from "../assets/images/moovcolumbluesmall.png";
 import logopapelaria from "../assets/images/logopapelaria.png";
 import logopapelariasemtexto from "../assets/images/logopapelariasemtexto.png";
+import google1 from "../assets/images/google1.png";
 
 export default {
   profile,
@@ -22,4 +23,5 @@ export default {
   moovcolumbluesmall,
   logopapelaria,
   logopapelariasemtexto,
+  google1,
 };
