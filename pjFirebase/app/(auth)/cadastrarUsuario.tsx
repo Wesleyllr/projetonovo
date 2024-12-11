@@ -144,7 +144,7 @@ const Cadastro = ({ navigation }) => {
         }`}
       />
       <TouchableOpacity
-          className={`${
+          className={`w-full items-end ${
             Platform.OS === "web" ? "max-w-[400px]" : ""
           }`}
           onPress={direcionarParaCadastrar}
