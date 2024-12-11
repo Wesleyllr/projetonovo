@@ -14,21 +14,47 @@ import FormField from "@/components/FormField";
 import { Platform } from "react-native";
 import CustomAlert from "@/components/CustomAlert";
 import CustomButton from "@/components/CustomButton";
+import CustomAlert2 from "@/components/CustomAlert2";
+import { Button } from "react-native-elements";
+import { images } from "@/constants";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const router = useRouter();
 
+  const getFriendlyErrorMessage = (errorCode) => {
+    const errorMessages = {
+      "auth/invalid-email": "Por favor, insira um email válido.",
+      "auth/user-not-found": "Usuário não encontrado. Verifique o email ou cadastre-se.",
+      "auth/wrong-password": "Senha incorreta. Tente novamente.",
+      "auth/email-already-in-use": "Este email já está em uso. Tente outro ou faça login.",
+      "auth/weak-password": "A senha é muito fraca. Escolha uma senha mais segura.",
+      "auth/too-many-requests":
+        "Muitas tentativas falhas. Por favor, tente novamente mais tarde.",
+      "auth/network-request-failed": "Erro de conexão. Verifique sua internet.",
+      "auth/requires-recent-login":
+        "Faça login novamente para concluir esta ação.",
+      "auth/operation-not-allowed":
+        "Este tipo de autenticação está temporariamente desativado.",
+      "auth/invalid-credential":
+        "Senha inválida.",
+      "auth/missing-password":
+        "Insira a senha.",
+    };
+  
+    return errorMessages[errorCode] || error.message;
+  };
+  
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Login bem-sucedido, navegue para a Home
-        router.push("/home"); // Usando push para empurrar a tela na pilha
+        router.push("/home");
       })
       .catch((error) => {
-        Alert.alert("Erro", error.message);
+        const friendlyMessage = getFriendlyErrorMessage(error.code);
+        Alert.alert("Erro", friendlyMessage);
       });
   };
 
@@ -59,12 +85,17 @@ const Login = () => {
         }`}
       />
       <View
-        className={`w-full items-end ${
+        className={`flex-row justify-between w-full items-end ${
           Platform.OS === "web" ? "max-w-[400px]" : ""
         }`}
       >
+        <TouchableOpacity onPress={handleAnotherAction}>
+          <Text className="ml-4 text-secundaria-800 font-pregular text-sm">
+            Cadastrar
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
-          className={`w-full items-end ${
+          className={`${
             Platform.OS === "web" ? "max-w-[400px]" : ""
           }`}
           onPress={handleAnotherAction}
@@ -82,16 +113,15 @@ const Login = () => {
         <CustomButton
           title="Login"
           handlePress={handleLogin}
-          containerStyles={`mt-2 w-full ${
+          containerStyles={`mt-6 w-full ${
             Platform.OS === "web" ? "max-w-[300px]" : ""
           }`}
         />
-        <TouchableOpacity onPress={handleAnotherAction}>
-          <Text className="text-secundaria-800 font-psemibold text-base">
-            Cadastrar
-          </Text>
-        </TouchableOpacity>
       </View>
+      <TouchableOpacity className="mt-4 w-14 h-14 items-center justify-center border border-secundaria rounded-full">
+      <Image source={images.google1} className="w-9 h-9" resizeMode="contain"/>
+
+      </TouchableOpacity>
     </View>
   );
 };

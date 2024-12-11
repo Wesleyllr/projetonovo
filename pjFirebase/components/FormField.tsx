@@ -26,7 +26,7 @@ const FormField: React.FC<FormFieldProps> = ({
     <View className={`space-y-2 ${otherStyles}`}>
       <View
         className="border-2 border-secundaria-500 w-full h-16 px-4 bg-primaria rounded-2xl
-        focus:border-secondary flex-col"
+        focus:border-primaria flex-col"
       >
         <View
           className={`w-full h-16 justify-end ${
@@ -38,7 +38,7 @@ const FormField: React.FC<FormFieldProps> = ({
               className="flex-1 text-secundaria-950 font-psemibold text-base"
               value={value}
               placeholder={placeholder}
-              placeholderTextColor="#7b7b8b"
+              placeholderTextColor="#0090ce"
               onChangeText={handleChangeText}
               secureTextEntry={
                 (title === "Password" || title === "Senha" || title === "Confirmar senha") && !showPassword
@@ -63,7 +63,7 @@ const FormField: React.FC<FormFieldProps> = ({
             )}
           </View>
         </View>
-        <Text className="text-base text-secundaria-600 font-psemibold absolute ml-3">
+        <Text className="text-base text-secundaria-600 font-psemibold absolute ml-2">
           {title}
         </Text>
       </View>

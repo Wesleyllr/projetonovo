@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert, Platform } from "react-native";
+import { View, Text, TextInput, Button, Alert, Platform, TouchableOpacity } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import { doc, setDoc, getFirestore } from "firebase/firestore"; // Importando para salvar dados no Firestore
 import FormField from "@/components/FormField";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CustomButton from "@/components/CustomButton";
+import { router } from "expo-router";
 
 const Cadastro = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -15,6 +17,12 @@ const Cadastro = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const db = getFirestore(); // Instanciando o Firestore
+
+  const direcionarParaCadastrar = () => {
+    // Navegar para outra tela usando push
+    router.push("/login"); // Substitua "OutraTela" pela tela desejada
+  };
+
 
   // Função para lidar com o cadastro
   const handleSignUp = async () => {
@@ -59,15 +67,37 @@ const Cadastro = ({ navigation }) => {
       setUsername("");
       setNomeCompleto("");
     } catch (error) {
-      const errorMessage = error.message || "Ocorreu um erro ao criar a conta.";
-      Alert.alert("Erro", errorMessage);
+      const friendlyMessage = getFriendlyErrorMessage(error.code);
+      Alert.alert("Erro", friendlyMessage);
     } finally {
       setLoading(false);
     }
   };
-
+  const getFriendlyErrorMessage = (errorCode) => {
+    const errorMessages = {
+      "auth/invalid-email": "Por favor, insira um email válido.",
+      "auth/user-not-found": "Usuário não encontrado. Verifique o email ou cadastre-se.",
+      "auth/wrong-password": "Senha incorreta. Tente novamente.",
+      "auth/email-already-in-use": "Este email já está em uso. Tente outro ou faça login.",
+      "auth/weak-password": "A senha é muito fraca. Escolha uma senha mais segura.",
+      "auth/too-many-requests":
+        "Muitas tentativas falhas. Por favor, tente novamente mais tarde.",
+      "auth/network-request-failed": "Erro de conexão. Verifique sua internet.",
+      "auth/requires-recent-login":
+        "Faça login novamente para concluir esta ação.",
+      "auth/operation-not-allowed":
+        "Este tipo de autenticação está temporariamente desativado.",
+      "auth/invalid-credential":
+        "Senha inválida.",
+        "auth/missing-password":
+        "Insira a senha.",
+    };
+  
+    return errorMessages[errorCode] || error.message;
+  };
+  
   return (
-    <SafeAreaView className="flex-1 justify-center p-5 bg-primaria">
+    <SafeAreaView className="flex-1 justify-center p-5 bg-primaria items-center">
       <Text className="text-2xl font-bold text-center mb-5">Cadastro</Text>
 
       <FormField
@@ -113,12 +143,23 @@ const Cadastro = ({ navigation }) => {
           Platform.OS === "web" ? "max-w-[400px]" : ""
         }`}
       />
-
-      <Button
-        title={loading ? "Cadastrando..." : "Cadastrar"}
-        onPress={handleSignUp}
-        disabled={loading}
-      />
+      <TouchableOpacity
+          className={`${
+            Platform.OS === "web" ? "max-w-[400px]" : ""
+          }`}
+          onPress={direcionarParaCadastrar}
+        >
+          <Text className="text-secundaria-800 font-pregular text-sm mr-4">
+            Já tenho conta!
+          </Text>
+      </TouchableOpacity>
+      <CustomButton
+          title={loading ? "Cadastrando..." : "Cadastrar"}
+          handlePress={handleSignUp}
+          containerStyles={`mt-6 w-full ${
+            Platform.OS === "web" ? "max-w-[300px]" : ""
+          }`}
+        />
     </SafeAreaView>
   );
 };
