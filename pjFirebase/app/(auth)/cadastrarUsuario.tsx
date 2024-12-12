@@ -109,7 +109,12 @@ const Cadastro = ({ navigation }) => {
   };
 
   return (
+    
     <SafeAreaView className="w-full h-full">
+              <LinearGradient
+          colors={["#effaff", "#78dcff"]}
+          className="absolute inset-0 w-full h-full "
+        />
       <ScrollView
         className="flex-1 p-5"
         contentContainerStyle={{
@@ -117,12 +122,6 @@ const Cadastro = ({ navigation }) => {
           alignItems: "center",
         }}
       >
-        <LinearGradient
-          colors={["#6B73FF", "#000DFF"]}
-          className="absolute inset-0"
-        />
-        <View className="absolute w-32 h-32 bg-purple-300 opacity-50 rounded-full top-10 left-5" />
-        <View className="absolute w-48 h-48 bg-blue-300 opacity-50 rounded-full bottom-20 right-5" />
         <Image
           source={images.logo}
           className={`mt-6 ${

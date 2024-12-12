@@ -18,6 +18,8 @@ import CustomAlert2 from "@/components/CustomAlert2";
 import { Button } from "react-native-elements";
 import { images } from "@/constants";
 import ProductList from "../screens/ProductList";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -66,66 +68,73 @@ const Login = () => {
   };
 
   return (
-    <View className="flex-1 justify-center items-center p-5 bg-white">
-      <Text className="text-4xl font-bold text-center mb-5">Bem vindo(a)!</Text>
-      <Image />
-      <FormField
-        title="Email"
-        value={email}
-        handleChangeText={(e) => setEmail(e)}
-        keyboardType="email-address"
-        otherStyles={`mt-7 w-full ${
-          Platform.OS === "web" ? "max-w-[400px]" : ""
-        }`}
-      />
-      <FormField
-        title="Senha"
-        value={password}
-        handleChangeText={(e) => setPassword(e)}
-        otherStyles={`mt-7 w-full ${
-          Platform.OS === "web" ? "max-w-[400px]" : ""
-        }`}
-      />
-      <View
-        className={`flex-row justify-between w-full items-end ${
-          Platform.OS === "web" ? "max-w-[400px]" : ""
-        }`}
-      >
-        <TouchableOpacity onPress={handleAnotherAction}>
-          <Text className="ml-4 text-secundaria-800 font-pregular text-sm">
-            Cadastrar
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className={`${Platform.OS === "web" ? "max-w-[400px]" : ""}`}
-          onPress={handleAnotherAction}
-        >
-          <Text className="text-secundaria-800 font-pregular text-sm mr-4">
-            Esqueceu a senha?
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View
-        className={` w-full justify-start items-end ${
-          Platform.OS === "web" ? "max-w-[300px]" : ""
-        }`}
-      >
-        <CustomButton
-          title="Login"
-          handlePress={handleLogin}
-          containerStyles={`mt-6 w-full ${
-            Platform.OS === "web" ? "max-w-[300px]" : ""
+    <SafeAreaView className="w-full h-full justify-center items-center">
+      <View className="w-full h-full justify-center items-center">
+        <LinearGradient
+            colors={["#effaff", "#78dcff"]}
+            className="absolute inset-0 w-full h-full "
+        />
+        <Text className="text-4xl font-bold text-center mb-5">Bem vindo(a)!</Text>
+        <Image />
+        <FormField
+          title="Email"
+          value={email}
+          handleChangeText={(e) => setEmail(e)}
+          keyboardType="email-address"
+          otherStyles={`mt-7 w-full ${
+            Platform.OS === "web" ? "max-w-[400px]" : ""
           }`}
         />
-      </View>
-      <TouchableOpacity className="mt-4 w-14 h-14 items-center justify-center border border-secundaria rounded-full">
-        <Image
-          source={images.google1}
-          className="w-9 h-9"
-          resizeMode="contain"
+        <FormField
+          title="Senha"
+          value={password}
+          handleChangeText={(e) => setPassword(e)}
+          otherStyles={`mt-7 w-full ${
+            Platform.OS === "web" ? "max-w-[400px]" : ""
+          }`}
         />
-      </TouchableOpacity>
-    </View>
+        <View
+          className={`flex-row justify-between w-full items-end ${
+            Platform.OS === "web" ? "max-w-[400px]" : ""
+          }`}
+        >
+          <TouchableOpacity onPress={handleAnotherAction}>
+            <Text className="ml-4 text-secundaria-800 font-pregular text-sm">
+              Cadastrar
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`${Platform.OS === "web" ? "max-w-[400px]" : ""}`}
+            onPress={handleAnotherAction}
+          >
+            <Text className="text-secundaria-800 font-pregular text-sm mr-4">
+              Esqueceu a senha?
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View
+          className={` w-full justify-start items-end ${
+            Platform.OS === "web" ? "max-w-[300px]" : ""
+          }`}
+        >
+          <CustomButton
+            title="Login"
+            handlePress={handleLogin}
+            containerStyles={`mt-6 w-full ${
+              Platform.OS === "web" ? "max-w-[300px]" : ""
+            }`}
+          />
+        </View>
+        <TouchableOpacity className="mt-4 w-14 h-14 items-center justify-center border border-secundaria rounded-full">
+          <Image
+            source={images.google1}
+            className="w-9 h-9"
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+      </View>
+    </SafeAreaView>
   );
 };
 
