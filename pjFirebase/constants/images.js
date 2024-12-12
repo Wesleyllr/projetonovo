@@ -5,8 +5,6 @@ import path from "../assets/images/path.png";
 import logo from "../assets/images/logo.png";
 import logoSmall from "../assets/images/logo-small.png";
 import empty from "../assets/images/empty.png";
-import moovcolumblue from "../assets/images/moovcolumblue.png";
-import moovcolumbluesmall from "../assets/images/moovcolumbluesmall.png";
 import logopapelaria from "../assets/images/logopapelaria.png";
 import logopapelariasemtexto from "../assets/images/logopapelariasemtexto.png";
 import google1 from "../assets/images/google1.png";
@@ -19,8 +17,6 @@ export default {
   logo,
   logoSmall,
   empty,
-  moovcolumblue,
-  moovcolumbluesmall,
   logopapelaria,
   logopapelariasemtexto,
   google1,

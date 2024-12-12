@@ -17,6 +17,7 @@ import CustomButton from "@/components/CustomButton";
 import CustomAlert2 from "@/components/CustomAlert2";
 import { Button } from "react-native-elements";
 import { images } from "@/constants";
+import ProductList from "../screens/ProductList";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -26,10 +27,13 @@ const Login = () => {
   const getFriendlyErrorMessage = (errorCode) => {
     const errorMessages = {
       "auth/invalid-email": "Por favor, insira um email válido.",
-      "auth/user-not-found": "Usuário não encontrado. Verifique o email ou cadastre-se.",
+      "auth/user-not-found":
+        "Usuário não encontrado. Verifique o email ou cadastre-se.",
       "auth/wrong-password": "Senha incorreta. Tente novamente.",
-      "auth/email-already-in-use": "Este email já está em uso. Tente outro ou faça login.",
-      "auth/weak-password": "A senha é muito fraca. Escolha uma senha mais segura.",
+      "auth/email-already-in-use":
+        "Este email já está em uso. Tente outro ou faça login.",
+      "auth/weak-password":
+        "A senha é muito fraca. Escolha uma senha mais segura.",
       "auth/too-many-requests":
         "Muitas tentativas falhas. Por favor, tente novamente mais tarde.",
       "auth/network-request-failed": "Erro de conexão. Verifique sua internet.",
@@ -37,15 +41,13 @@ const Login = () => {
         "Faça login novamente para concluir esta ação.",
       "auth/operation-not-allowed":
         "Este tipo de autenticação está temporariamente desativado.",
-      "auth/invalid-credential":
-        "Senha inválida.",
-      "auth/missing-password":
-        "Insira a senha.",
+      "auth/invalid-credential": "Senha inválida.",
+      "auth/missing-password": "Insira a senha.",
     };
-  
+
     return errorMessages[errorCode] || error.message;
   };
-  
+
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
@@ -95,9 +97,7 @@ const Login = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`${
-            Platform.OS === "web" ? "max-w-[400px]" : ""
-          }`}
+          className={`${Platform.OS === "web" ? "max-w-[400px]" : ""}`}
           onPress={handleAnotherAction}
         >
           <Text className="text-secundaria-800 font-pregular text-sm mr-4">
@@ -119,8 +119,11 @@ const Login = () => {
         />
       </View>
       <TouchableOpacity className="mt-4 w-14 h-14 items-center justify-center border border-secundaria rounded-full">
-      <Image source={images.google1} className="w-9 h-9" resizeMode="contain"/>
-
+        <Image
+          source={images.google1}
+          className="w-9 h-9"
+          resizeMode="contain"
+        />
       </TouchableOpacity>
     </View>
   );

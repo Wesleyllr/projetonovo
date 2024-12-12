@@ -27,11 +27,7 @@ const IndexScreen = () => {
 
   return (
     <View className="flex-1 justify-center items-center bg-white">
-      <Image
-        source={images.moovcolumblue}
-        resizeMode="contain"
-        className="w-60 h-20"
-      />
+      <Image source={images.logo} resizeMode="contain" className="w-60 h-20" />
       <Text className="text-2xl font-bold text-center">Seja bem vindo!</Text>
       <Text className="text-2xl font-bold text-center">
         Estamos verificando o Login...
