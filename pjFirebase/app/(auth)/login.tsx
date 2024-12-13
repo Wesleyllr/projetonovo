@@ -2,28 +2,25 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Alert,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebaseConfig"; // Certifique-se de configurar corretamente o firebase
-import { useRouter } from "expo-router"; // Importando useRouter
+import { auth } from "@/firebaseConfig";
+import { useRouter } from "expo-router";
 import FormField from "@/components/FormField";
-import { Platform } from "react-native";
-import CustomAlert from "@/components/CustomAlert";
 import CustomButton from "@/components/CustomButton";
-import CustomAlert2 from "@/components/CustomAlert2";
-import { Button } from "react-native-elements";
-import { images } from "@/constants";
-import ProductList from "../screens/ProductList";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getUserInfo } from "@/userService"; // Importando a função para buscar informações do usuário
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // Estado para indicador de carregamento
   const router = useRouter();
 
   const getFriendlyErrorMessage = (errorCode) => {
@@ -50,59 +47,48 @@ const Login = () => {
     return errorMessages[errorCode] || error.message;
   };
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
+  const handleLogin = async () => {
+    setLoading(true); // Ativa o estado de carregamento
 
-        // Verifique se o e-mail foi verificado
-        if (!user.emailVerified) {
-          Alert.alert(
-            "Verificação necessária",
-            "Seu e-mail não foi verificado. Por favor, verifique seu e-mail antes de fazer login."
-          );
+    try {
+      // Login do usuário
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-          // Opcional: Enviar novamente o e-mail de verificação
-          user
-            .sendEmailVerification()
-            .then(() => {
-              Alert.alert(
-                "E-mail enviado",
-                "Um novo e-mail de verificação foi enviado para sua caixa de entrada."
-              );
-            })
-            .catch((error) => {
-              console.error("Erro ao enviar e-mail de verificação:", error);
-            });
+      // Verificar se o e-mail foi verificado
+      if (!user.emailVerified) {
+        Alert.alert(
+          "Verificação necessária",
+          "Seu e-mail não foi verificado. Verifique seu e-mail antes de fazer login."
+        );
+        setLoading(false); // Desativa o estado de carregamento
+        return;
+      }
 
-          return;
-        }
+      // Carregar informações do usuário
+      const userInfo = await getUserInfo("nome"); // Exemplo: obtém o campo "nome"
 
-        // Login bem-sucedido e e-mail verificado
-        router.push("/home");
-      })
-      .catch((error) => {
-        const friendlyMessage = getFriendlyErrorMessage(error.code);
-        Alert.alert("Erro", friendlyMessage);
-      });
-  };
-
-  const handleAnotherAction = () => {
-    // Navegar para outra tela usando push
-    router.push("/cadastrarUsuario"); // Substitua "OutraTela" pela tela desejada
+      // Redireciona para a tela Home
+      router.push("/home");
+    } catch (error) {
+      const friendlyMessage = getFriendlyErrorMessage(error.code);
+      Alert.alert("Erro", friendlyMessage);
+    } finally {
+      setLoading(false); // Desativa o estado de carregamento
+    }
   };
 
   return (
     <SafeAreaView className="w-full h-full justify-center items-center">
-      <View className="w-full h-full justify-center items-center">
         <LinearGradient
           colors={["#effaff", "#78dcff"]}
-          className="absolute inset-0 w-full h-full "
+          className="absolute inset-0 w-full h-full"
         />
+      <View className="w-full h-full justify-center items-center px-4">
+
         <Text className="text-4xl font-bold text-center mb-5">
           Bem vindo(a)!
         </Text>
-        <Image />
         <FormField
           title="Email"
           value={email}
@@ -120,44 +106,21 @@ const Login = () => {
             Platform.OS === "web" ? "max-w-[400px]" : ""
           }`}
         />
-        <View
-          className={`flex-row justify-between w-full items-end ${
-            Platform.OS === "web" ? "max-w-[400px]" : ""
-          }`}
-        >
-          <TouchableOpacity onPress={handleAnotherAction}>
-            <Text className="ml-4 text-secundaria-800 font-pregular text-sm">
-              Cadastrar
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className={`${Platform.OS === "web" ? "max-w-[400px]" : ""}`}
-            onPress={handleAnotherAction}
-          >
-            <Text className="text-secundaria-800 font-pregular text-sm mr-4">
-              Esqueceu a senha?
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          className={` w-full justify-start items-end ${
-            Platform.OS === "web" ? "max-w-[300px]" : ""
-          }`}
-        >
-          <CustomButton
-            title="Login"
-            handlePress={handleLogin}
-            containerStyles={`mt-6 w-full ${
-              Platform.OS === "web" ? "max-w-[300px]" : ""
-            }`}
-          />
-        </View>
-        <TouchableOpacity className="mt-4 w-14 h-14 items-center justify-center border border-secundaria rounded-full">
-          <Image
-            source={images.google1}
-            className="w-9 h-9"
-            resizeMode="contain"
-          />
+        <CustomButton
+          title="Login"
+          handlePress={handleLogin}
+          containerStyles="mt-6 w-full"
+        />
+
+        {/* Indicador de carregamento */}
+        {loading && (
+          <ActivityIndicator size="large" color="#0000ff" className="mt-4" />
+        )}
+
+        <TouchableOpacity className="mt-4">
+          <Text className="text-secundaria-800 font-pregular text-sm">
+            Esqueceu a senha?
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
