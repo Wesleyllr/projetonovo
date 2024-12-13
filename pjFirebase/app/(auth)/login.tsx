@@ -53,7 +53,32 @@ const Login = () => {
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Login bem-sucedido, navegue para a Home
+        const user = userCredential.user;
+
+        // Verifique se o e-mail foi verificado
+        if (!user.emailVerified) {
+          Alert.alert(
+            "Verificação necessária",
+            "Seu e-mail não foi verificado. Por favor, verifique seu e-mail antes de fazer login."
+          );
+
+          // Opcional: Enviar novamente o e-mail de verificação
+          user
+            .sendEmailVerification()
+            .then(() => {
+              Alert.alert(
+                "E-mail enviado",
+                "Um novo e-mail de verificação foi enviado para sua caixa de entrada."
+              );
+            })
+            .catch((error) => {
+              console.error("Erro ao enviar e-mail de verificação:", error);
+            });
+
+          return;
+        }
+
+        // Login bem-sucedido e e-mail verificado
         router.push("/home");
       })
       .catch((error) => {
@@ -71,10 +96,12 @@ const Login = () => {
     <SafeAreaView className="w-full h-full justify-center items-center">
       <View className="w-full h-full justify-center items-center">
         <LinearGradient
-            colors={["#effaff", "#78dcff"]}
-            className="absolute inset-0 w-full h-full "
+          colors={["#effaff", "#78dcff"]}
+          className="absolute inset-0 w-full h-full "
         />
-        <Text className="text-4xl font-bold text-center mb-5">Bem vindo(a)!</Text>
+        <Text className="text-4xl font-bold text-center mb-5">
+          Bem vindo(a)!
+        </Text>
         <Image />
         <FormField
           title="Email"
@@ -132,7 +159,6 @@ const Login = () => {
             resizeMode="contain"
           />
         </TouchableOpacity>
-
       </View>
     </SafeAreaView>
   );

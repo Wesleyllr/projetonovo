@@ -19,6 +19,7 @@ import CustomButton from "@/components/CustomButton";
 import { router } from "expo-router";
 import { images } from "@/constants";
 import { LinearGradient } from "expo-linear-gradient"; // Ensure you have expo-linear-gradient installed
+import { sendEmailVerification } from "firebase/auth";
 
 const Cadastro = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -58,17 +59,23 @@ const Cadastro = ({ navigation }) => {
       );
 
       // Obtenha o UID do usuário criado
-      const { uid } = userCredential.user;
+      const { user } = userCredential;
+
+      // Enviar e-mail de verificação
+      await sendEmailVerification(user);
 
       // Salve o username e o nome completo no Firestore
-      await setDoc(doc(db, "users", uid), {
+      await setDoc(doc(db, "users", user.uid), {
         username: username,
         nomeCompleto: nomeCompleto,
         email: email,
       });
 
       // Cadastro bem-sucedido
-      Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
+      Alert.alert(
+        "Sucesso",
+        "Cadastro realizado com sucesso! Um e-mail de verificação foi enviado."
+      );
       router.replace("/login"); // Navega para a tela de Login
 
       // Resetar campos
@@ -84,6 +91,7 @@ const Cadastro = ({ navigation }) => {
       setLoading(false);
     }
   };
+
   const getFriendlyErrorMessage = (errorCode) => {
     const errorMessages = {
       "auth/invalid-email": "Por favor, insira um email válido.",
@@ -109,12 +117,11 @@ const Cadastro = ({ navigation }) => {
   };
 
   return (
-    
     <SafeAreaView className="w-full h-full">
-              <LinearGradient
-          colors={["#effaff", "#78dcff"]}
-          className="absolute inset-0 w-full h-full "
-        />
+      <LinearGradient
+        colors={["#effaff", "#78dcff"]}
+        className="absolute inset-0 w-full h-full "
+      />
       <ScrollView
         className="flex-1 p-5"
         contentContainerStyle={{
