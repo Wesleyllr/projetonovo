@@ -5,6 +5,8 @@ import { useRouter } from "expo-router";
 import { auth } from "@/firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getUserInfo } from "@/userService";
+import CardProduto1 from "@/components/CardProduto1";
+import CardProduto2 from "@/components/CardProduto2";
 
 const Home = () => {
   const router = useRouter();
@@ -53,37 +55,17 @@ const Home = () => {
       >
         <Text className="text-white text-center">Sair</Text>
       </TouchableOpacity>
-      <View className="flex-1 bg-gray-600 flex-row justify-around">
-        <View className="w-32 h-48 bg-white">
-          <Image
-            className="w-32 h-32 rounded-2xl"
-            source={require("../../assets/images/teste1.jpg")}
-            resizeMode="contain"
-          />
-          <Text className="font-extrabold text-xl text-green-600 ">
-            R$ 18,00
-          </Text>
-          <Text className="flex-1 text-base leading-[14px]" numberOfLines={2}>
-            Frappuccino
-          </Text>
-        </View>
-        <View className="w-32 h-48 bg-secundaria">
-          <View className="w-32 h-32 rounded-2xl items-end justify-end">
-            <Image
-              className="w-32 h-32 rounded-2xl"
-              source={require("../../assets/images/teste1.jpg")}
-              resizeMode="contain"
-            />
-            <Text className="font-extrabold text-base text-right text-green-600 absolute">
-              R$ 18,00
-            </Text>
-          </View>
-
-          <Text className="flex-1 text-base leading-[14px]" numberOfLines={2}>
-            Frappuccino
-          </Text>
-        </View>
-        <View className="w-32 h-48 bg-secundaria-800"></View>
+      <View className="flex flex-row flex-wrap justify-between px-4">
+        <CardProduto1
+          imageSource={require("../../assets/images/teste1.jpg")}
+          price="R$ 18,00"
+          title="Frappuccino"
+        />
+        <CardProduto2
+          imageSource={require("../../assets/images/teste1.jpg")}
+          price="R$ 12,00"
+          title="Frappuccino"
+        />
       </View>
     </SafeAreaView>
   );
