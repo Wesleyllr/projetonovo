@@ -1,9 +1,9 @@
 import React from "react";
 import { TouchableOpacity, View, Text, Image } from "react-native";
 
-const CardProduto2 = ({ imageSource, price, title }) => {
+const CardProduto2 = ({ imageSource, price, title, onPress }) => {
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={onPress}>
       <View className="w-32 h-48 bg-white">
         <View className="w-32 h-36 rounded-2xl items-end justify-end bg-black">
           <Image

@@ -8,6 +8,7 @@ import CardProduto1 from "@/components/CardProduto1";
 import CardProduto2 from "@/components/CardProduto2";
 import { auth, db } from '@/firebaseConfig'; // Importa o auth e db configurados
 import { doc, collection, addDoc } from 'firebase/firestore';
+import CustomButton from "@/components/CustomButton";
 
 const Home = () => {
   const router = useRouter();
@@ -78,23 +79,27 @@ const Home = () => {
     );
   };
 
+  const handleEnviarFoto = () => {
+    console.log("Foto enviada")
+  };
+
+
 
   return (
-    <SafeAreaView className="flex-1 bg-primaria">
+    <SafeAreaView className="flex-1 bg-primaria flex-col">
       <Text>Bem-vindo!</Text>
       {loading ? (
         <Text>Carregando o username...</Text>
       ) : (
         <Text>Username do usuário: {userInfo}</Text>
       )}
-
       <TouchableOpacity
         className="bg-blue-500 p-3 rounded"
         onPress={handleLogout}
       >
         <Text className="text-white text-center">Sair</Text>
       </TouchableOpacity>
-      <View className="flex flex-row flex-wrap justify-between px-4">
+      <View className="flex-row flex-wrap justify-between px-4">
         <CardProduto1
           imageSource={require("../../assets/images/teste1.jpg")}
           price="R$ 18,00"
@@ -107,6 +112,7 @@ const Home = () => {
           title="Frappuccino"
         />
       </View>
+      <CustomButton title="enviar foto" handlePress={handleEnviarFoto}/>
     </SafeAreaView>
   );
 };
