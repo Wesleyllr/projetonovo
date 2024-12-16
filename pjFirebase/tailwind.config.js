@@ -4,6 +4,9 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      lineHeight: {
+        tight: "1.25", // Adiciona um estilo para espaçamento menor
+      },
       colors: {
         secundaria: {
           DEFAULT: "#0fbcf9",
