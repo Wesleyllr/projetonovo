@@ -7,6 +7,7 @@ import {
 import { getFirestore } from "firebase/firestore"; // Importa o Firestore
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native"; // Importa Platform
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCsOvBG67DfpdhNzy72bo_dG91DnSQjYfE",
@@ -19,6 +20,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+const storage = getStorage(app);
 
 // Verifica se o ambiente é Web ou React Native
 const isWeb = Platform.OS === "web";
@@ -33,4 +36,4 @@ const auth = initializeAuth(app, {
 // Inicializa o Firestore
 const db = getFirestore(app);
 
-export { auth, db }; // Exporta tanto o Auth quanto o Firestore
+export { auth, db, storage }; // Exporta tanto o Auth quanto o Firestore

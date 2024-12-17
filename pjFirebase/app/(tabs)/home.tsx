@@ -1,19 +1,59 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Alert, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { signOut } from "firebase/auth";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getUserInfo } from "@/userService";
+import { auth } from "@/firebaseConfig";
+import { uploadImage } from "@/scripts/uploadImage";
+import { addProduct } from "@/scripts/productService";
+import CustomButton from "@/components/CustomButton";
 import CardProduto1 from "@/components/CardProduto1";
 import CardProduto2 from "@/components/CardProduto2";
-import { auth, db } from '@/firebaseConfig'; // Importa o auth e db configurados
-import { doc, collection, addDoc } from 'firebase/firestore';
-import CustomButton from "@/components/CustomButton";
+import { pickImagem } from "@/scripts/selecionarImagem";
 
 const Home = () => {
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false); // Adiciona estado de carregamento para a imagem
+
+  // Função para buscar informações do usuário
+  const getUserInfo = async (field: string) => {
+    try {
+      // Suponha que você tenha o 'displayName' do usuário
+      const user = auth.currentUser;
+      if (user) {
+        return user[field] || null; // Retorna o valor do campo
+      }
+      return null; // Retorna null se o usuário não estiver autenticado
+    } catch (error) {
+      console.error("Erro ao obter informações do usuário:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const username = await getUserInfo("displayName");
+        setUserInfo(username);
+      } catch (error) {
+        Alert.alert("Erro", "Falha ao carregar informações do usuário.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleLogout = () => {
     signOut(auth)
@@ -26,70 +66,60 @@ const Home = () => {
       });
   };
 
-  useEffect(() => {
-    // Buscar informações do usuário de forma assíncrona
-    const fetchUserInfo = async () => {
-      try {
-        const username = await getUserInfo("username"); // Aguarda o serviço
-        setUserInfo(username); // Atualiza o estado com o username
-      } catch (error) {
-        Alert.alert("Erro", "Falha ao carregar informações do usuário.");
-      } finally {
-        setLoading(false); // Garante que o estado de carregamento seja atualizado
-      } 
-    };
-
-    fetchUserInfo();
-  }, []);
-  async function addProduct(title, description, value, category, date) {
-    try {
-      // Obtém o ID do usuário autenticado
-      const userId = auth.currentUser?.uid;
-      if (!userId) {
-        throw new Error('Usuário não autenticado.');
-      }
-  
-      // Referência à subcoleção "products" do usuário
-      const productsRef = collection(db, 'users', userId, 'products');
-      
-  
-      // Adiciona um novo produto
-      const newProduct = {
-        title,
-        description,
-        value,
-        category,
-        date,
-      };
-  
-      const docRef = await addDoc(productsRef, newProduct);
-      console.log('Produto adicionado com ID:', docRef.id);
-    } catch (error) {
-      console.error('Erro ao adicionar o produto:', error.message);
+  const handleSelectImage = async () => {
+    const uri = await pickImagem();
+    if (uri) {
+      setSelectedImage(uri);
     }
-  }
-
-  const handleAddProduct = () => {
-    addProduct(
-      'Produto de Teste',
-      'Descrição do produto de teste',
-      150.0,
-      'Eletrônicos',
-      '2024-12-16'
-    );
   };
 
-  const handleEnviarFoto = () => {
-    console.log("Foto enviada")
+  const handleAddProduct = async () => {
+    if (!selectedImage) {
+      Alert.alert("Erro", "Selecione uma imagem antes de adicionar o produto.");
+      return;
+    }
+    setIsUploading(true); // Inicia o carregamento da imagem
+    try {
+      const imageUrl = await uploadImage(selectedImage);
+      await addProduct(
+        "Produto de Teste",
+        "Descrição",
+        150.0,
+        "Eletrônicos",
+        "2024-12-16",
+        imageUrl
+      );
+      Alert.alert("Sucesso", "Produto adicionado com sucesso!");
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao adicionar o produto.");
+    } finally {
+      setIsUploading(false); // Finaliza o carregamento da imagem
+    }
   };
 
+  const handleEnviarFoto = async () => {
+    if (!selectedImage) {
+      Alert.alert("Erro", "Nenhuma imagem selecionada.");
+      return;
+    }
 
+    setIsUploading(true); // Inicia o carregamento da imagem
+    try {
+      const imageUrl = await uploadImage(selectedImage);
+      Alert.alert("Sucesso", "Imagem enviada para o Firebase Storage!");
+      console.log("URL da imagem:", imageUrl);
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao enviar a imagem.");
+    } finally {
+      setIsUploading(false); // Finaliza o carregamento da imagem
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-primaria flex-col">
       <Text>Bem-vindo!</Text>
       {loading ? (
-        <Text>Carregando o username...</Text>
+        <ActivityIndicator size="large" color="#0000ff" /> // Exibe o indicador enquanto o username está carregando
       ) : (
         <Text>Username do usuário: {userInfo}</Text>
       )}
@@ -112,7 +142,26 @@ const Home = () => {
           title="Frappuccino"
         />
       </View>
-      <CustomButton title="enviar foto" handlePress={handleEnviarFoto}/>
+      <CustomButton title="selecionar foto" handlePress={handleSelectImage} />
+      {selectedImage && (
+        <View className="w-28 h-28 rounded-xl bg-gray-500">
+          <Image
+            source={{ uri: selectedImage }}
+            style={{ width: "100%", height: "100%" }}
+          />
+        </View>
+      )}
+      {isUploading ? ( // Exibe o indicador de carregamento quando a imagem está sendo carregada
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <>
+          <CustomButton title="enviar foto" handlePress={handleEnviarFoto} />
+          <CustomButton
+            title="adicionar produto"
+            handlePress={handleAddProduct}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 };
