@@ -1,5 +1,6 @@
 import React from "react";
-import { TouchableOpacity, View, Text, Image } from "react-native";
+import { TouchableOpacity, View, Text } from "react-native";
+import { Image } from "expo-image";
 
 const CardProduto1 = ({ imageSource, price, title, onPress }) => {
   // Formatar preço para o formato "R$"
@@ -14,7 +15,7 @@ const CardProduto1 = ({ imageSource, price, title, onPress }) => {
         <Image
           className="w-32 h-32 rounded-2xl"
           source={imageSource}
-          resizeMode="contain"
+          cachePolicy="disk"
         />
         <Text className="font-extrabold text-lg text-green-600">
           {formattedPrice}

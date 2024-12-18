@@ -121,11 +121,7 @@ const Home = () => {
       />
       <CustomButton title="Selecionar Foto" handlePress={handleSelectImage} />
       {selectedImage && (
-        <Image
-          source={{ uri: selectedImage }}
-          style={{ width: 100, height: 100, marginVertical: 10 }}
-          cachePolicy="disk"
-        />
+        <Image source={{ uri: selectedImage }} cachePolicy="disk" />
       )}
       {isUploading ? (
         <ActivityIndicator size="large" color="#0000ff" />
