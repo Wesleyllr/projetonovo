@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
+  RefreshControl,
 } from "react-native";
 import { signOut } from "firebase/auth";
 import { useRouter } from "expo-router";
@@ -18,11 +19,13 @@ import CardProduto1 from "@/components/CardProduto1";
 import { pickImagem } from "@/scripts/selecionarImagem";
 import { Image } from "expo-image";
 import { getUserInfo } from "@/userService";
+import { images } from "@/constants";
 
 const Home = () => {
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false); // Estado para controle do refresh
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
@@ -31,7 +34,7 @@ const Home = () => {
     const fetchUserData = async () => {
       try {
         // Usar getUserInfo para buscar o nome de usuário no Firestore
-        const username = await getUserInfo("username"); // Aguarda o serviço
+        const username = await getUserInfo("username");
         setUserInfo(username); // Atualiza o estado com o username
         const userProducts = await getUserProducts();
         setProducts(userProducts);
@@ -44,16 +47,6 @@ const Home = () => {
 
     fetchUserData();
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      Alert.alert("Sucesso", "Você foi deslogado.");
-      router.push("/login");
-    } catch (error) {
-      Alert.alert("Erro", error.message);
-    }
-  };
 
   const handleSelectImage = async () => {
     const uri = await pickImagem();
@@ -86,6 +79,21 @@ const Home = () => {
     }
   };
 
+  // Função para o "refresh"
+  const handleRefresh = async () => {
+    setIsRefreshing(true); // Inicia o estado de refresh
+    try {
+      const userProducts = await getUserProducts();
+      setProducts(userProducts); // Atualiza os produtos
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao atualizar produtos.");
+    } finally {
+      setIsRefreshing(false); // Finaliza o estado de refresh
+    }
+  };
+  const handleTelaPerfil = async () => {
+    router.push("/perfil");
+  };
   const renderProduct = ({ item }: { item: any }) => (
     <CardProduto1
       title={item.title}
@@ -96,29 +104,55 @@ const Home = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-primaria flex-col">
-      <Text>Bem-vindo!</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <Text>Username do usuário: {userInfo}</Text>
-      )}
-      <TouchableOpacity
-        className="bg-blue-500 p-3 rounded"
-        onPress={handleLogout}
-      >
-        <Text className="text-white text-center">Sair</Text>
-      </TouchableOpacity>
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item.id}
-        renderItem={renderProduct}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-        ListEmptyComponent={() => (
-          <Text style={{ textAlign: "center", marginTop: 16 }}>
-            Nenhum produto encontrado.
-          </Text>
+      <View className="w-full h-16 bg-secundaria-300">
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <View className="flex-1 bg-secundaria-300 flex-row px-2 py-2 gap-2">
+            <Text className="flex-1 font-thin text-2xl bg-white">
+              Olá, {userInfo}
+            </Text>
+            <TouchableOpacity onPress={handleTelaPerfil}>
+              <Image
+                className="w-12 h-12 bg-white border-2 border-secundaria-700 rounded-full"
+                source={images.profile}
+                contentFit="cover"
+              />
+            </TouchableOpacity>
+          </View>
         )}
-      />
+      </View>
+      <View className="w-full h-[2px] bg-secundaria-700 mb-2" />
+      <View className="w-full h-60 justify-center">
+        <Text className="font-bold text-2xl text-center mb-2">
+          Todos produtos
+        </Text>
+        <View className="w-full h-[1px] bg-secundaria-600 mb-2" />
+
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id}
+          renderItem={renderProduct}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            flexDirection: "row", // Define a direção dos itens
+            flexWrap: "wrap", // Permite que os itens quebrem para a próxima linha
+            justifyContent: "space-between", // Espaçamento entre os itens
+          }}
+          ListEmptyComponent={() => (
+            <Text style={{ textAlign: "center", marginTop: 16 }}>
+              Nenhum produto encontrado.
+            </Text>
+          )}
+          // Adiciona o refreshControl
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+            />
+          }
+        />
+      </View>
       <CustomButton title="Selecionar Foto" handlePress={handleSelectImage} />
       {selectedImage && (
         <Image source={{ uri: selectedImage }} cachePolicy="disk" />
