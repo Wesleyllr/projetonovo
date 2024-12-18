@@ -4,7 +4,6 @@ import {
   Text,
   Alert,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
   FlatList,
 } from "react-native";
@@ -17,6 +16,8 @@ import { addProduct, getUserProducts } from "@/scripts/productService";
 import CustomButton from "@/components/CustomButton";
 import CardProduto1 from "@/components/CardProduto1";
 import { pickImagem } from "@/scripts/selecionarImagem";
+import { Image } from "expo-image";
+import { getUserInfo } from "@/userService";
 
 const Home = () => {
   const router = useRouter();
@@ -29,14 +30,15 @@ const Home = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const username = auth.currentUser?.displayName || "Usuário Anônimo";
-        setUserInfo(username);
+        // Usar getUserInfo para buscar o nome de usuário no Firestore
+        const username = await getUserInfo("username"); // Aguarda o serviço
+        setUserInfo(username); // Atualiza o estado com o username
         const userProducts = await getUserProducts();
         setProducts(userProducts);
       } catch (error) {
         Alert.alert("Erro", "Falha ao carregar dados.");
       } finally {
-        setLoading(false);
+        setLoading(false); // Garante que o estado de carregamento seja atualizado
       }
     };
 
@@ -122,6 +124,7 @@ const Home = () => {
         <Image
           source={{ uri: selectedImage }}
           style={{ width: 100, height: 100, marginVertical: 10 }}
+          cachePolicy="disk"
         />
       )}
       {isUploading ? (

@@ -52,7 +52,11 @@ const Login = () => {
 
     try {
       // Login do usuário
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
       // Verificar se o e-mail foi verificado
@@ -80,12 +84,11 @@ const Login = () => {
 
   return (
     <SafeAreaView className="w-full h-full justify-center items-center">
-        <LinearGradient
-          colors={["#effaff", "#78dcff"]}
-          className="absolute inset-0 w-full h-full"
-        />
+      <LinearGradient
+        colors={["#effaff", "#78dcff"]}
+        className="absolute inset-0 w-full h-full"
+      />
       <View className="w-full h-full justify-center items-center px-4">
-
         <Text className="text-4xl font-bold text-center mb-5">
           Bem vindo(a)!
         </Text>
