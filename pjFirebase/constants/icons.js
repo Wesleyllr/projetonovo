@@ -14,6 +14,8 @@ import play from "../assets/icons/play.png";
 import close from "../assets/icons/close.png";
 import vender from "../assets/icons/vender.png";
 import arrowBack from "../assets/icons/arrow_back.png";
+import add from "../assets/icons/add.png";
+import cancel from "../assets/icons/cancel.png";
 
 export default {
   play,
@@ -32,4 +34,6 @@ export default {
   close,
   vender,
   arrowBack,
+  add,
+  cancel,
 };

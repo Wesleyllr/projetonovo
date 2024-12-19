@@ -1,57 +1,78 @@
-import React, { useState } from "react";
-import { View, TextInput, Modal, Button, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  TextInput,
+  Modal,
+  Button,
+  Text,
+  Image,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { db, auth } from "@/firebaseConfig"; // Importando o Firestore
-import { doc, setDoc, collection } from "firebase/firestore"; // Funções para manipulação de Firestore
-import { getUserInfo } from "@/userService"; // Função para obter o userId
+import { addUserCategory, getUserCategories } from "@/userService"; // Funções para manipulação de categorias
+import FormFieldProduct from "./FormFieldProduct";
+import CustomButton from "./CustomButton";
+import { icons } from "@/constants";
+import BotaoComIcone from "./BotaoComIcone";
 
 const CategoryDropdown = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<string | null>(null);
-  const [items, setItems] = useState([
-    { label: "Eletrônicos", value: "eletronicos" },
-    { label: "Roupas", value: "roupas" },
-    { label: "Alimentos", value: "alimentos" },
-    { label: "Adicionar nova categoria...", value: "add_new" },
-  ]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [newCategory, setNewCategory] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Função para adicionar a nova categoria ao Firestore
-  const handleAddCategoryToFirestore = async () => {
-    if (newCategory.trim()) {
-      const userId = auth.currentUser?.uid;
-      if (!userId) {
-        alert("Usuário não autenticado.");
+  // Função para buscar as categorias do servidor
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const categories = await getUserCategories();
+      const formattedCategories = categories.map((category) => ({
+        label: category.name,
+        value: category.id,
+      }));
+
+      setItems([
+        ...formattedCategories,
+        { label: "Adicionar nova categoria...", value: "add_new" },
+      ]);
+    } catch (error) {
+      alert("Erro ao buscar categorias: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Função para adicionar nova categoria ao Firestore
+  const handleAddCategory = async () => {
+    try {
+      if (!newCategory.trim()) {
+        alert("Por favor, insira uma categoria válida.");
         return;
       }
 
-      try {
-        // Adiciona a nova categoria à subcoleção "categories" do usuário
-        const categoryRef = doc(collection(db, "users", userId, "categories"));
-        await setDoc(categoryRef, {
-          name: newCategory,
-          createdAt: new Date(),
-        });
+      const newCategoryData = await addUserCategory(newCategory);
 
-        // Atualiza o dropdown com a nova categoria
-        setItems((prevItems) => [
-          ...prevItems.filter((item) => item.value !== "add_new"),
-          {
-            label: newCategory,
-            value: newCategory.toLowerCase().replace(/\s/g, "_"),
-          },
-          { label: "Adicionar nova categoria...", value: "add_new" },
-        ]);
+      // Atualiza o dropdown com a nova categoria
+      setItems((prevItems) => [
+        ...prevItems.filter((item) => item.value !== "add_new"),
+        {
+          label: newCategoryData.name,
+          value: newCategoryData.id,
+        },
+        { label: "Adicionar nova categoria...", value: "add_new" },
+      ]);
 
-        setNewCategory("");
-        setModalVisible(false);
-      } catch (error) {
-        alert("Erro ao adicionar a categoria.");
-      }
-    } else {
-      alert("Por favor, insira uma categoria válida.");
+      // Define a nova categoria como selecionada
+      setValue(newCategoryData.id);
+
+      setNewCategory("");
+      setModalVisible(false);
+    } catch (error) {
+      alert("Erro ao adicionar a categoria: " + error.message);
     }
   };
 
@@ -62,6 +83,20 @@ const CategoryDropdown = () => {
       setValue(itemValue);
     }
   };
+
+  // Busca as categorias quando o componente é montado
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-100">
+        <ActivityIndicator size="large" color="#374151" />
+        <Text>Carregando categorias...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 justify-center items-center bg-gray-100 px-4">
@@ -89,22 +124,28 @@ const CategoryDropdown = () => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-center items-center bg-gray-500 bg-opacity-50">
-          <View className="bg-white p-6 rounded-lg w-80">
+          <View className="bg-white p-6 rounded-lg w-100">
             <Text className="text-xl font-bold mb-4">
               Adicionar Nova Categoria
             </Text>
-            <TextInput
-              className="border border-gray-300 rounded-lg p-2 mb-4"
-              placeholder="Digite a nova categoria"
+            <FormFieldProduct
               value={newCategory}
-              onChangeText={setNewCategory}
+              handleChangeText={setNewCategory} // Atualiza o estado com o nome digitado
+              placeholder="Digite a nova categoria"
+              otherStyles="p-2 mb-4"
             />
-            <Button title="Adicionar" onPress={handleAddCategoryToFirestore} />
-            <Button
-              title="Cancelar"
-              onPress={() => setModalVisible(false)}
-              color="gray"
-            />
+            <View className="w-max h-10 flex-row gap-2 items-center align-middle justify-between">
+              <BotaoComIcone
+                text="Adicionar"
+                icon={icons.add}
+                onPress={handleAddCategory}
+              />
+              <BotaoComIcone
+                text="Cancelar"
+                icon={icons.cancel}
+                onPress={() => setModalVisible(false)}
+              />
+            </View>
           </View>
         </View>
       </Modal>

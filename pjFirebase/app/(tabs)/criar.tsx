@@ -8,6 +8,8 @@ import { addProduct } from "@/scripts/productService";
 import { pickImagem } from "@/scripts/selecionarImagem";
 import FormFieldProduct from "@/components/FormFieldProduct";
 import CategoryDropdown from "@/components/CategoryDropdown";
+import { addUserCategory, getUserCategories } from "@/userService";
+import { icons } from "@/constants";
 
 const Criar = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -49,6 +51,23 @@ const Criar = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const categories = await getUserCategories();
+      console.log("Categorias do usuário:", categories);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const registrarNovaCategoria = async () => {
+    try {
+      const newCategory = await addUserCategory("Doces");
+      console.log("Categoria adicionada com sucesso:", newCategory);
+    } catch (error) {
+      console.error("Erro ao adicionar a categoria:", error.message);
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-primaria gap-2">
       <Text className="mb-2">Criar</Text>
@@ -86,6 +105,14 @@ const Criar = () => {
           handlePress={handleAddProduct} // Chama a função para adicionar o produto
         />
       )}
+      <CustomButton
+        title="Pegar categorias"
+        handlePress={fetchCategories} // Chama a função para adicionar o produto
+      />
+      <CustomButton
+        title="registrar categoria"
+        handlePress={registrarNovaCategoria} // Chama a função para adicionar o produto
+      />
     </SafeAreaView>
   );
 };

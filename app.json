@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "eb8c4542-19ac-446d-afcf-fa8dd82275a3"
+      }
+    },
+    "android": {
+      "package": "com.wesleyllr.pjfirebase"
+    }
+  }
+}
