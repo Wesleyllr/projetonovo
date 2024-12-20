@@ -16,6 +16,7 @@ import vender from "../assets/icons/vender.png";
 import arrowBack from "../assets/icons/arrow_back.png";
 import add from "../assets/icons/add.png";
 import cancel from "../assets/icons/cancel.png";
+import save from "../assets/icons/save.png";
 
 export default {
   play,
@@ -36,4 +37,5 @@ export default {
   arrowBack,
   add,
   cancel,
+  save,
 };

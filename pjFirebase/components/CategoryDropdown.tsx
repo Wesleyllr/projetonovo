@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { addUserCategory, getUserCategories } from "@/userService"; // Funções para manipulação de categorias
@@ -37,7 +38,7 @@ const CategoryDropdown = () => {
 
       setItems([
         ...formattedCategories,
-        { label: "Adicionar nova categoria...", value: "add_new" },
+        { label: "Adicionar categoria...", value: "add_new" },
       ]);
     } catch (error) {
       alert("Erro ao buscar categorias: " + error.message);
@@ -50,7 +51,7 @@ const CategoryDropdown = () => {
   const handleAddCategory = async () => {
     try {
       if (!newCategory.trim()) {
-        alert("Por favor, insira uma categoria válida.");
+        Alert.alert("", "Por favor, insira uma categoria.");
         return;
       }
 
@@ -91,7 +92,7 @@ const CategoryDropdown = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-100">
+      <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#374151" />
         <Text>Carregando categorias...</Text>
       </View>
@@ -99,8 +100,9 @@ const CategoryDropdown = () => {
   }
 
   return (
-    <View className="flex-1 justify-center items-center bg-gray-100 px-4">
+    <View className="flex-1 justify-center items-center px-4">
       <DropDownPicker
+        listMode="SCROLLVIEW"
         open={open}
         value={value}
         items={items}
@@ -125,9 +127,7 @@ const CategoryDropdown = () => {
       >
         <View className="flex-1 justify-center items-center bg-gray-500 bg-opacity-50">
           <View className="bg-white p-6 rounded-lg w-100">
-            <Text className="text-xl font-bold mb-4">
-              Adicionar Nova Categoria
-            </Text>
+            <Text className="text-xl font-bold mb-4">Adicionar Categoria</Text>
             <FormFieldProduct
               value={newCategory}
               handleChangeText={setNewCategory} // Atualiza o estado com o nome digitado
