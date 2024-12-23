@@ -8,97 +8,63 @@ import {
   FlatList,
   RefreshControl,
 } from "react-native";
-import { signOut } from "firebase/auth";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth } from "@/firebaseConfig";
-import { uploadImage } from "@/scripts/uploadImage";
-import { addProduct, getUserProducts } from "@/scripts/productService";
-import CustomButton from "@/components/CustomButton";
-import CardProduto1 from "@/components/CardProduto1";
-import { pickImagem } from "@/scripts/selecionarImagem";
 import { Image } from "expo-image";
 import { getUserInfo } from "@/userService";
+import { getUserProducts } from "@/scripts/productService";
+import CardProduto1 from "@/components/CardProduto1";
 import { images } from "@/constants";
 
 const Home = () => {
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false); // Estado para controle do refresh
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        // Usar getUserInfo para buscar o nome de usuário no Firestore
-        const username = await getUserInfo("username");
-        setUserInfo(username); // Atualiza o estado com o username
-        const userProducts = await getUserProducts();
-        setProducts(userProducts);
-      } catch (error) {
-        Alert.alert("Erro", "Falha ao carregar dados.");
-      } finally {
-        setLoading(false); // Garante que o estado de carregamento seja atualizado
-      }
-    };
-
     fetchUserData();
   }, []);
 
-  const handleSelectImage = async () => {
-    const uri = await pickImagem();
-    if (uri) setSelectedImage(uri);
-  };
-
-  const handleAddProduct = async () => {
-    if (!selectedImage) {
-      Alert.alert("Erro", "Selecione uma imagem antes de adicionar o produto.");
-      return;
-    }
-    setIsUploading(true);
+  const fetchUserData = async () => {
     try {
-      const imageUrl = await uploadImage(selectedImage);
-      await addProduct(
-        "Produto de Teste",
-        "Descrição",
-        150.0,
-        "Eletrônicos",
-        "2024-12-16",
-        imageUrl
-      );
-      Alert.alert("Sucesso", "Produto adicionado com sucesso!");
+      const username = await getUserInfo("username");
+      setUserInfo(username);
       const userProducts = await getUserProducts();
       setProducts(userProducts);
     } catch (error) {
-      Alert.alert("Erro", "Falha ao adicionar o produto.");
+      Alert.alert("Erro", "Falha ao carregar dados.");
     } finally {
-      setIsUploading(false);
+      setLoading(false);
     }
   };
 
-  // Função para o "refresh"
   const handleRefresh = async () => {
-    setIsRefreshing(true); // Inicia o estado de refresh
+    setIsRefreshing(true);
     try {
-      const userProducts = await getUserProducts();
-      setProducts(userProducts); // Atualiza os produtos
+      await fetchUserData();
     } catch (error) {
       Alert.alert("Erro", "Falha ao atualizar produtos.");
     } finally {
-      setIsRefreshing(false); // Finaliza o estado de refresh
+      setIsRefreshing(false);
     }
   };
-  const handleTelaPerfil = async () => {
+
+  const handleTelaPerfil = () => {
     router.push("/perfil");
   };
-  const renderProduct = ({ item }: { item: any }) => (
+
+  const handleAddProduct = () => {
+    router.push("/criar");
+  };
+
+  const renderProduct = ({ item }) => (
     <CardProduto1
       title={item.title}
       price={item.value}
-      imageSource={{ uri: item.imageUrl }}
+      imageSource={item.imageUrl ? { uri: item.imageUrl } : null}
+      backgroundColor={item.backgroundColor}
     />
   );
 
@@ -123,7 +89,8 @@ const Home = () => {
         )}
       </View>
       <View className="w-full h-[2px] bg-secundaria-700 mb-2" />
-      <View className="w-full h-60 justify-center">
+
+      <View className="flex-1">
         <Text className="font-bold text-2xl text-center mb-2">
           Todos produtos
         </Text>
@@ -133,18 +100,17 @@ const Home = () => {
           data={products}
           keyExtractor={(item) => item.id}
           renderItem={renderProduct}
+          numColumns={3}
+          columnWrapperStyle={{
+            justifyContent: "space-around",
+            marginBottom: 16,
+          }}
           contentContainerStyle={{
-            paddingHorizontal: 16,
-            flexDirection: "row", // Define a direção dos itens
-            flexWrap: "wrap", // Permite que os itens quebrem para a próxima linha
-            justifyContent: "space-between", // Espaçamento entre os itens
+            padding: 2,
           }}
           ListEmptyComponent={() => (
-            <Text style={{ textAlign: "center", marginTop: 16 }}>
-              Nenhum produto encontrado.
-            </Text>
+            <Text className="text-center mt-4">Nenhum produto encontrado.</Text>
           )}
-          // Adiciona o refreshControl
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}
@@ -153,18 +119,13 @@ const Home = () => {
           }
         />
       </View>
-      <CustomButton title="Selecionar Foto" handlePress={handleSelectImage} />
-      {selectedImage && (
-        <Image source={{ uri: selectedImage }} cachePolicy="disk" />
-      )}
-      {isUploading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <CustomButton
-          title="Adicionar Produto"
-          handlePress={handleAddProduct}
-        />
-      )}
+
+      <TouchableOpacity
+        onPress={handleAddProduct}
+        className="absolute bottom-6 right-6 w-14 h-14 bg-blue-500 rounded-full items-center justify-center"
+      >
+        <Text className="text-white text-3xl">+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

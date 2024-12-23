@@ -32,25 +32,28 @@ export const addProduct = async (
 };
 
 export const getUserProducts = async () => {
-  try {
-    const userId = auth.currentUser?.uid;
-    if (!userId) {
-      throw new Error("Usuário não autenticado.");
-    }
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não está autenticado");
 
-    const productsRef = collection(db, "users", userId, "products");
+  const productsRef = collection(db, `users/${user.uid}/products`);
+
+  try {
     const querySnapshot = await getDocs(productsRef);
 
     if (querySnapshot.empty) {
-      return []; // Retorna uma lista vazia ao invés de undefined
+      return [];
     }
 
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
+      // Garantir que price seja um número
+      value:
+        typeof doc.data().value === "number"
+          ? doc.data().value
+          : parseFloat(doc.data().value || "0"),
     }));
   } catch (error) {
-    console.error("Erro ao buscar produtos do usuário:", error.message);
-    return []; // Em caso de erro, retorna lista vazia
+    throw new Error("Erro ao buscar produtos: " + error.message);
   }
 };

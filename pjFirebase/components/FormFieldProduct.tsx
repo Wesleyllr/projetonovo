@@ -75,7 +75,7 @@ const FormFieldProduct: React.FC<FormFieldProductProps> = ({
         <TextInput
           className={`w-full ${
             multiline
-              ? "h-24 border-x-[1px] border-t-[1px] rounded-t-lg border-secundaria-700"
+              ? "h-24 border-[1px] rounded-lg border-secundaria-700"
               : "h-12"
           } text-secundaria-950 font-psemibold text-base`}
           numberOfLines={multiline ? 4 : 1}
@@ -91,7 +91,9 @@ const FormFieldProduct: React.FC<FormFieldProductProps> = ({
           scrollEnabled={multiline}
         />
       </View>
-      <View className="w-full h-[2px] bg-secundaria-700 " />
+      <View
+        className={`${multiline ? "" : "w-full h-[2px] bg-secundaria-700"}`}
+      />
     </View>
   );
 };

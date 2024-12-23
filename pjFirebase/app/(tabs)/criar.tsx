@@ -1,4 +1,11 @@
-import { View, Text, Alert, ActivityIndicator, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { Image } from "expo-image";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,6 +18,9 @@ import CategoryDropdown from "@/components/CategoryDropdown";
 import { addUserCategory, getUserCategories } from "@/userService";
 import Header from "@/components/CustomHeader";
 import { useRouter } from "expo-router";
+import ColorSelector from "@/components/ColorSelector";
+import { doc, setDoc } from "firebase/firestore";
+import { db, auth } from "@/firebaseConfig";
 
 const Criar = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -20,20 +30,30 @@ const Criar = () => {
   const [productPreco, setProductPreco] = useState("");
   const [productCusto, setProductCusto] = useState("");
   const [productCodigoBarra, setProductCodigoBarra] = useState("");
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+
   const router = useRouter();
 
   const handleGoBack = () => {
-    router.back(); // Navega para a tela anterior
+    router.back();
   };
 
   const handleSelectImage = async () => {
     const uri = await pickImagem();
-    if (uri) setSelectedImage(uri);
+    if (uri) {
+      setSelectedImage(uri);
+      setSelectedColor(null); // Limpa a cor selecionada quando uma imagem é escolhida
+    }
+  };
+
+  const handleColorSelect = (color) => {
+    setSelectedColor(color);
+    setSelectedImage(null); // Limpa a imagem selecionada quando uma cor é escolhida
   };
 
   const handleAddProduct = async () => {
-    if (!selectedImage) {
-      Alert.alert("Erro", "Selecione uma imagem antes de adicionar o produto.");
+    if (!selectedImage && !selectedColor) {
+      Alert.alert("Erro", "Selecione uma imagem ou uma cor para o produto.");
       return;
     }
     if (!productName) {
@@ -43,58 +63,57 @@ const Criar = () => {
 
     setIsUploading(true);
     try {
-      const imageUrl = await uploadImage(selectedImage);
+      const user = auth.currentUser;
+      if (!user) throw new Error("Usuário não autenticado");
 
-      // Converte o preço para número (removendo formatação)
+      let imageUrl = null;
+
+      // Se tiver imagem, faz upload
+      if (selectedImage) {
+        imageUrl = await uploadImage(selectedImage);
+      }
+
+      // Converte o preço para número
       const precoNumerico = parseFloat(productPreco.replace(/\D/g, "")) / 100;
+      const custoNumerico = parseFloat(productCusto.replace(/\D/g, "")) / 100;
 
-      await addProduct(
-        productName,
-        productDescricao,
-        precoNumerico, // Valor bruto (numérico)
-        "Ajustar para enviar a Categoria Selecionada",
-        "Ajustar para enviar data atual",
-        imageUrl
-      );
+      // Cria objeto do produto
+      const productData = {
+        name: productName,
+        description: productDescricao,
+        price: precoNumerico,
+        cost: custoNumerico,
+        barcode: productCodigoBarra,
+        createdAt: new Date(),
+        ...(imageUrl ? { imageUrl } : { backgroundColor: selectedColor }), // Adiciona imageUrl ou backgroundColor
+      };
+
+      // Salva no Firestore
+      const productRef = doc(collection(db, `users/${user.uid}/products`));
+      await setDoc(productRef, productData);
+
       Alert.alert("Sucesso", "Produto adicionado com sucesso!");
+
+      // Limpa o formulário
+      setProductName("");
+      setProductDescricao("");
+      setProductPreco("");
+      setProductCusto("");
+      setProductCodigoBarra("");
+      setSelectedImage(null);
+      setSelectedColor(null);
     } catch (error) {
+      console.error("Erro ao adicionar produto:", error);
       Alert.alert("Erro", "Falha ao adicionar o produto.");
     } finally {
       setIsUploading(false);
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const categories = await getUserCategories();
-      console.log("Categorias do usuário:", categories);
-    } catch (error) {
-      console.error(error.message);
-    }
-  };
-
-  const exibirLogValor = async () => {
-    const precoNumerico2 = parseFloat(productPreco.replace(/\D/g, "")) / 100;
-    const precoNumerico3 = parseFloat(productCusto.replace(/\D/g, "")) / 100;
-
-    console.log("valor armazenado Preço:", precoNumerico2);
-    console.log("valor armazenado Custo:", precoNumerico3);
-  };
-
-  const registrarNovaCategoria = async () => {
-    try {
-      const newCategory = await addUserCategory("Doces");
-      console.log("Categoria adicionada com sucesso:", newCategory);
-    } catch (error) {
-      console.error("Erro ao adicionar a categoria:", error.message);
-    }
-  };
-
   return (
     <SafeAreaView className="flex-1">
-      <Header onGoBack={handleGoBack} onSave={exibirLogValor} />
-      <ScrollView className=" flex-1 bg-primaria" nestedScrollEnabled={true}>
-        <Text className="mb-2">Criar</Text>
+      <Header onGoBack={handleGoBack} />
+      <ScrollView className="flex-1 bg-primaria" nestedScrollEnabled={true}>
         <FormFieldProduct
           title="Novo Produto"
           value={productName}
@@ -115,8 +134,8 @@ const Criar = () => {
             title="Preço de Venda"
             value={productPreco}
             handleChangeText={(text) => {
-              const rawValue = text.replace(/\D/g, ""); // Apenas números
-              setProductPreco(rawValue); // Valor bruto no estado
+              const rawValue = text.replace(/\D/g, "");
+              setProductPreco(rawValue);
             }}
             placeholder="Preço de Venda"
             otherStyles="px-4 flex-1"
@@ -144,8 +163,8 @@ const Criar = () => {
           placeholder="Código de barras"
           otherStyles="px-4"
         />
-        {/* Exibindo a imagem selecionada */}
-        <View className="w-full h-40 bg-slate-700 justify-center items-center flex-row px-4">
+
+        <View className="w-full h-40 mt-2 bg-slate-700 justify-center items-center flex-row px-4">
           {selectedImage ? (
             <Image
               source={{ uri: selectedImage }}
@@ -153,22 +172,35 @@ const Criar = () => {
               contentFit="contain"
             />
           ) : (
-            <Text className="text-white">Selecione uma imagem</Text>
+            <View className="w-40 h-40 rounded-xl bg-secundaria-300 justify-center items-center">
+              {selectedColor ? (
+                <View
+                  className="w-full h-full rounded-xl"
+                  style={{ backgroundColor: selectedColor }}
+                />
+              ) : (
+                <TouchableOpacity
+                  onPress={handleSelectImage}
+                  disabled={!!selectedColor}
+                  className="bg-black w-full h-full rounded-xl justify-center"
+                >
+                  <Text className="text-white text-center">
+                    Selecione uma imagem ou cor
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
-          <View className="flex-1 h-40 bg-secundaria-300 gap-2">
-            <View></View>
+          <View className="flex-1 h-40 bg-secundaria-300">
+            <ColorSelector
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
+              onColorSelect={handleColorSelect}
+              disabled={!!selectedImage}
+            />
           </View>
         </View>
-        <CustomButton
-          title="Exibir valor armazenado"
-          handlePress={exibirLogValor}
-          containerStyles="my-2"
-        />
-        <CustomButton
-          title="Selecionar Foto"
-          handlePress={handleSelectImage}
-          containerStyles="mb-2"
-        />
+
         {isUploading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
@@ -178,16 +210,6 @@ const Criar = () => {
             containerStyles="mb-2"
           />
         )}
-        <CustomButton
-          title="Pegar categorias"
-          handlePress={fetchCategories}
-          containerStyles="mb-2"
-        />
-        <CustomButton
-          title="registrar categoria"
-          handlePress={registrarNovaCategoria}
-          containerStyles="mb-2"
-        />
       </ScrollView>
     </SafeAreaView>
   );
