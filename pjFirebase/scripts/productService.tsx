@@ -2,12 +2,15 @@ import { collection, addDoc, getDocs } from "firebase/firestore";
 import { db, auth } from "@/firebaseConfig";
 
 export const addProduct = async (
-  title: string,
-  description: string,
-  value: number,
-  category: string,
-  date: string,
-  imageUrl: string
+  title,
+  description,
+  value,
+  custo,
+  category,
+  date,
+  imageUrl,
+  codeBar,
+  selectedColor // Add selectedColor as a parameter
 ) => {
   try {
     const userId = auth.currentUser?.uid;
@@ -20,9 +23,12 @@ export const addProduct = async (
       title,
       description,
       value,
+      custo,
       category,
       date,
       imageUrl,
+      codeBar,
+      backgroundColor: selectedColor || null, // Use selectedColor here
     };
 
     await addDoc(productsRef, newProduct);
@@ -47,11 +53,14 @@ export const getUserProducts = async () => {
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-      // Garantir que price seja um número
       value:
         typeof doc.data().value === "number"
           ? doc.data().value
           : parseFloat(doc.data().value || "0"),
+      custo:
+        typeof doc.data().custo === "number"
+          ? doc.data().custo
+          : parseFloat(doc.data().custo || "0"),
     }));
   } catch (error) {
     throw new Error("Erro ao buscar produtos: " + error.message);

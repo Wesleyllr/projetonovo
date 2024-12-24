@@ -17,9 +17,9 @@ import CustomButton from "./CustomButton";
 import { icons } from "@/constants";
 import BotaoComIcone from "./BotaoComIcone";
 
-const CategoryDropdown = () => {
+const CategoryDropdown = ({ value: selectedValue, onChange }) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState<string | null>(null);
+  const [value, setValue] = useState<string | null>(selectedValue);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -82,6 +82,7 @@ const CategoryDropdown = () => {
       setModalVisible(true);
     } else {
       setValue(itemValue);
+      onChange(itemValue);
     }
   };
 

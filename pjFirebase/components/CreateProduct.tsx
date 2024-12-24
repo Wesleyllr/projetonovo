@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,22 +8,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Image } from "expo-image";
-import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "@/components/CustomButton";
-import { uploadImage } from "@/scripts/uploadImage";
-import { addProduct } from "@/scripts/productService";
-import { pickImagem } from "@/scripts/selecionarImagem";
 import FormFieldProduct from "@/components/FormFieldProduct";
 import CategoryDropdown from "@/components/CategoryDropdown";
-import { addUserCategory, getUserCategories } from "@/userService";
 import Header from "@/components/CustomHeader";
-import { useRouter } from "expo-router";
 import ColorSelector from "@/components/ColorSelector";
-import { doc, setDoc } from "firebase/firestore";
-import { db, auth } from "@/firebaseConfig";
+import { useRouter } from "expo-router";
+import { uploadProductImage } from "@/services/uploadService";
+import { addNewProduct } from "@/services/productService";
+import { pickImagem } from "@/scripts/selecionarImagem";
 
-const Criar = () => {
+const CreateProduct = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [productName, setProductName] = useState("");
@@ -71,24 +68,20 @@ const Criar = () => {
 
     setIsUploading(true);
     try {
-      const user = auth.currentUser;
-      if (!user) throw new Error("Usuário não autenticado");
-
-      let imageUrl = selectedImage ? await uploadImage(selectedImage) : "";
+      const imageUrl = await uploadProductImage(selectedImage);
       const precoNumerico = parseFloat(productPreco.replace(/\D/g, "")) / 100;
       const custoNumerico = parseFloat(productCusto.replace(/\D/g, "")) / 100;
 
-      await addProduct(
+      await addNewProduct({
         productName,
         productDescricao,
         precoNumerico,
         custoNumerico,
         selectedCategory,
-        new Date().toISOString(),
         imageUrl,
         productCodigoBarra,
-        selectedColor // Pass selectedColor here
-      );
+        selectedColor,
+      });
 
       Alert.alert("Sucesso", "Produto adicionado com sucesso!");
 
@@ -217,4 +210,4 @@ const Criar = () => {
   );
 };
 
-export default Criar;
+export default CreateProduct;
