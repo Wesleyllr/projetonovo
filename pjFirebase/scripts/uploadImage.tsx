@@ -1,35 +1,34 @@
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { auth, storage } from "@/firebaseConfig"; // Importa o auth para pegar o userId
+import { auth, storage } from "@/firebaseConfig";
 
-export const uploadImage = async (uri: string) => {
-  try {
-    // Verifica se o usuário está autenticado
+// Classe para lidar com a autenticação
+class AuthService {
+  static ensureAuthenticated() {
     const user = auth.currentUser;
     if (!user) {
       throw new Error("Usuário não autenticado");
     }
+    return user.uid;
+  }
+}
 
+// Função para upload da imagem
+export const uploadImage = async (uri: string) => {
+  try {
+    const userId = AuthService.ensureAuthenticated();
     const response = await fetch(uri);
     if (!response.ok) {
       throw new Error("Falha ao acessar a imagem. Status: " + response.status);
     }
 
     const blob = await response.blob();
-
-    // Obtém o userId a partir do usuário autenticado
-    const userId = user.uid; // Pega o ID do usuário autenticado
-    const fileName = `encantoFotos/${userId}/${Date.now()}.jpg`; // Define o nome do arquivo com base no userId e timestamp
-
-    // Cria a referência para o armazenamento do Firebase
+    const fileName = `encantoFotos/${userId}/${Date.now()}.jpg`;
     const storageRef = ref(storage, fileName);
 
-    // Envia a imagem para o Firebase Storage
     await uploadBytes(storageRef, blob);
 
-    // Obtém a URL de download da imagem
     const downloadURL = await getDownloadURL(storageRef);
 
-    // Retorna a URL de download
     return downloadURL;
   } catch (error) {
     console.error("Erro ao enviar imagem:", error.message);

@@ -15,12 +15,11 @@ import { addProduct } from "@/scripts/productService";
 import { pickImagem } from "@/scripts/selecionarImagem";
 import FormFieldProduct from "@/components/FormFieldProduct";
 import CategoryDropdown from "@/components/CategoryDropdown";
-import { addUserCategory, getUserCategories } from "@/userService";
 import Header from "@/components/CustomHeader";
 import { useRouter } from "expo-router";
 import ColorSelector from "@/components/ColorSelector";
-import { doc, setDoc } from "firebase/firestore";
 import { db, auth } from "@/firebaseConfig";
+import { Timestamp } from "firebase/firestore";
 
 const Criar = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -84,7 +83,7 @@ const Criar = () => {
         precoNumerico,
         custoNumerico,
         selectedCategory,
-        new Date().toISOString(),
+        Timestamp.fromDate(new Date()),
         imageUrl,
         productCodigoBarra,
         selectedColor // Pass selectedColor here

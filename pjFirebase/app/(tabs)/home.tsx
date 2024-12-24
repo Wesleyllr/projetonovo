@@ -145,14 +145,14 @@ const Home = () => {
   const filteredAndSortedProducts = useMemo(() => {
     return products
       .filter((product) =>
-        product.title.toLowerCase().includes(searchText.toLowerCase())
+        (product.title || "").toLowerCase().includes(searchText.toLowerCase())
       )
       .sort((a, b) => {
         if (sortField === "price") {
           const comparison = a.value - b.value;
           return sortOrder === "asc" ? comparison : -comparison;
         } else {
-          const comparison = a.title.localeCompare(b.title);
+          const comparison = a.title ? a.title.localeCompare(b.title) : 0;
           return sortOrder === "asc" ? comparison : -comparison;
         }
       });

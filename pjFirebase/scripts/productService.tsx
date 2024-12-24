@@ -1,6 +1,16 @@
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, Timestamp } from "firebase/firestore";
 import { db, auth } from "@/firebaseConfig";
 
+// Função para verificar se o usuário está autenticado
+const ensureAuthenticated = () => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    throw new Error("Usuário não autenticado.");
+  }
+  return userId;
+};
+
+// Função para adicionar um novo produto
 export const addProduct = async (
   title,
   description,
@@ -10,13 +20,10 @@ export const addProduct = async (
   date,
   imageUrl,
   codeBar,
-  selectedColor // Add selectedColor as a parameter
+  selectedColor
 ) => {
   try {
-    const userId = auth.currentUser?.uid;
-    if (!userId) {
-      throw new Error("Usuário não autenticado.");
-    }
+    const userId = ensureAuthenticated();
 
     const productsRef = collection(db, "users", userId, "products");
     const newProduct = {
@@ -25,10 +32,10 @@ export const addProduct = async (
       value,
       custo,
       category,
-      date,
+      date: Timestamp.fromDate(new Date()),
       imageUrl,
       codeBar,
-      backgroundColor: selectedColor || null, // Use selectedColor here
+      backgroundColor: selectedColor || null,
     };
 
     await addDoc(productsRef, newProduct);
@@ -37,11 +44,11 @@ export const addProduct = async (
   }
 };
 
+// Função para obter os produtos do usuário
 export const getUserProducts = async () => {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Usuário não está autenticado");
+  const userId = ensureAuthenticated();
 
-  const productsRef = collection(db, `users/${user.uid}/products`);
+  const productsRef = collection(db, `users/${userId}/products`);
 
   try {
     const querySnapshot = await getDocs(productsRef);
@@ -53,14 +60,8 @@ export const getUserProducts = async () => {
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-      value:
-        typeof doc.data().value === "number"
-          ? doc.data().value
-          : parseFloat(doc.data().value || "0"),
-      custo:
-        typeof doc.data().custo === "number"
-          ? doc.data().custo
-          : parseFloat(doc.data().custo || "0"),
+      value: parseFloat(doc.data().value || "0"),
+      custo: parseFloat(doc.data().custo || "0"),
     }));
   } catch (error) {
     throw new Error("Erro ao buscar produtos: " + error.message);

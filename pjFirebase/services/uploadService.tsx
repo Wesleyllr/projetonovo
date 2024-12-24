@@ -1,6 +1,8 @@
 import { uploadImage } from "@/scripts/uploadImage";
 
-export const uploadProductImage = async (imageUri) => {
-  if (!imageUri) return "";
-  return await uploadImage(imageUri);
-};
+export class UploadService {
+  static async uploadProductImage(imageUri: string): Promise<string> {
+    if (!imageUri) return "";
+    return await uploadImage(imageUri);
+  }
+}
