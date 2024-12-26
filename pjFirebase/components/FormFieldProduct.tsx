@@ -81,7 +81,7 @@ const FormFieldProduct: React.FC<FormFieldProductProps> = ({
           numberOfLines={multiline ? 4 : 1}
           value={displayValue} // Exibe o valor formatado ou vazio
           placeholder={placeholder}
-          placeholderTextColor="#0090ce"
+          placeholderTextColor="#553e3c"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onChangeText={handleTextChange} // Atualiza o estado

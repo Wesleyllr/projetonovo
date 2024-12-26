@@ -178,8 +178,8 @@ const Home = () => {
       onPress={onPress}
       className={`px-4 py-3 rounded-3xl mr-2 ${
         isSelected
-          ? "bg-secundaria-500 shadow-lg border border-secundaria-700"
-          : "bg-secundaria-100 hover:bg-secundaria-200"
+          ? "bg-terceira-500 shadow-lg border border-terceira-700"
+          : "bg-terceira-100 hover:bg-secundaria-200"
       }`}
     >
       <Text
@@ -239,8 +239,8 @@ const Home = () => {
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
-          <View className="flex-1 bg-secundaria-300 flex-row px-2 py-2 gap-2">
-            <Text className="flex-1 font-thin text-2xl bg-white">
+          <View className="flex-1 bg-secundaria-200 flex-row px-2 py-2 gap-2">
+            <Text className="flex-1 font-thin text-2xl text-secundaria-900">
               Olá, {userInfo}
             </Text>
             <TouchableOpacity onPress={() => router.push("/perfil")}>

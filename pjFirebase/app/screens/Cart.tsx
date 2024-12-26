@@ -6,11 +6,13 @@ import { CartItem } from "@/components/CartItem";
 import { CartService } from "@/services/CartService";
 import { OrderService } from "@/services/OrderService";
 import { ICartItem } from "@/types/CartTypes";
+import { CompactCartItem } from "@/components/CompactCartItem";
 
 export default function Cart() {
   const router = useRouter();
   const [items, setItems] = useState<ICartItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCompactView, setIsCompactView] = useState(false);
 
   const loadCart = async () => {
     try {
@@ -76,21 +78,37 @@ export default function Cart() {
 
   return (
     <SafeAreaView className="flex-1 bg-primaria">
-      <View className="p-4 bg-secundaria-500">
+      <View className="p-4 bg-secundaria-500 flex-row justify-between items-center">
         <Text className="text-2xl font-bold text-primaria">Carrinho</Text>
+        <TouchableOpacity
+          onPress={() => setIsCompactView(!isCompactView)}
+          className="bg-secundaria-600 px-3 py-1 rounded-lg"
+        >
+          <Text className="text-primaria text-lg">
+            {isCompactView ? "≣" : "≡"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <CartItem
-            item={item}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemove={handleRemoveItem}
-            onUpdateObservations={handleUpdateObservations}
-          />
-        )}
+        renderItem={({ item }) =>
+          isCompactView ? (
+            <CompactCartItem
+              item={item}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemoveItem}
+            />
+          ) : (
+            <CartItem
+              item={item}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemoveItem}
+              onUpdateObservations={handleUpdateObservations}
+            />
+          )
+        }
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
           <Text className="text-center text-quinta font-medium mt-4">
