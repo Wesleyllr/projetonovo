@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   TextInput,
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,11 +18,14 @@ import { Image } from "expo-image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUserInfo } from "@/userService";
 import { getUserProducts } from "@/scripts/productService";
+import { getUserCategories } from "@/userService";
 import CardProduto1 from "@/components/CardProduto1";
 import { images } from "@/constants";
+import { CartService } from "@/services/CartService";
+import { useNavigation } from "@react-navigation/native";
 
 const CACHE_KEY = "user_products_cache";
-const CACHE_DURATION = 1000 * 60 * 5; // 5 minutos
+const CACHE_DURATION = 1000 * 60 * 5;
 
 const Home = () => {
   const router = useRouter();
@@ -29,37 +33,53 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [sortField, setSortField] = useState<"price" | "title">("price");
-
-  const [filterText, setFilterText] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
+  const [cartCount, setCartCount] = useState(0);
+  const navigation = useNavigation();
 
-  // Animação do botão flutuante
   const scaleAnim = new Animated.Value(1);
-  const rotateAnim = new Animated.Value(0);
+  const opacityAnim = new Animated.Value(1);
+  const translateYAnim = new Animated.Value(0);
 
   const animateButton = () => {
-    Animated.parallel([
+    Animated.sequence([
+      // Aumenta o tamanho do botão com suavidade
+      Animated.spring(scaleAnim, {
+        toValue: 1.2,
+        useNativeDriver: true,
+      }),
+      // Diminui o tamanho de volta
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+      // Anima a opacidade (fade in e fade out)
+      Animated.timing(opacityAnim, {
+        toValue: 0.7,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      // Movimenta o botão levemente para cima e para baixo
       Animated.sequence([
-        Animated.spring(scaleAnim, {
-          toValue: 1.2,
+        Animated.timing(translateYAnim, {
+          toValue: -10,
+          duration: 150,
           useNativeDriver: true,
         }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
+        Animated.timing(translateYAnim, {
+          toValue: 0,
+          duration: 150,
           useNativeDriver: true,
         }),
       ]),
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 200,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      rotateAnim.setValue(0);
-    });
+    ]).start();
   };
 
   const loadCachedProducts = async () => {
@@ -115,6 +135,31 @@ const Home = () => {
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    const updateCartCount = async () => {
+      const count = await CartService.getItemCount();
+      setCartCount(count);
+    };
+
+    // Atualiza quando a tela recebe foco
+    const unsubscribe = navigation.addListener("focus", updateCartCount);
+
+    return () => unsubscribe();
+  }, [navigation]);
+  const fetchCategories = async () => {
+    try {
+      const userCategories = await getUserCategories();
+      setCategories(userCategories);
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao carregar categorias.");
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    fetchCategories(); // Adicione isso aqui para carregar as categorias
+  }, []);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -128,36 +173,66 @@ const Home = () => {
     }
   };
 
+  const CategoryButton = ({ name, isSelected, onPress }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      className={`px-4 py-3 rounded-3xl mr-2 ${
+        isSelected
+          ? "bg-secundaria-500 shadow-lg border border-secundaria-700"
+          : "bg-secundaria-100 hover:bg-secundaria-200"
+      }`}
+    >
+      <Text
+        className={`text-center font-medium ${
+          isSelected ? "text-white" : "text-secundaria-700"
+        }`}
+      >
+        {name}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const filteredAndSortedProducts = useMemo(() => {
+    return products
+      .filter((product) => {
+        const matchesSearch = product.title
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
+        const matchesCategory = selectedCategory
+          ? product.category === selectedCategory
+          : true;
+        return matchesSearch && matchesCategory;
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [products, searchText, selectedCategory]);
+
+  const handleProductPress = async (product) => {
+    try {
+      const cartItem: ICartItem = {
+        id: product.id,
+        title: product.title,
+        value: product.value,
+        quantity: 1,
+        imageUrl: product.imageUrl || undefined,
+        observations: "",
+      };
+
+      await CartService.addItem(cartItem);
+      setCartCount((prev) => prev + 1);
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao adicionar ao carrinho");
+    }
+  };
+
   const renderProduct = ({ item }) => (
     <CardProduto1
       title={item.title}
       price={item.value}
       imageSource={item.imageUrl ? { uri: item.imageUrl } : null}
       backgroundColor={item.backgroundColor}
+      onPress={() => handleProductPress(item)}
     />
   );
-
-  const rotate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "135deg"],
-  });
-
-  const filteredAndSortedProducts = useMemo(() => {
-    return products
-      .filter((product) =>
-        (product.title || "").toLowerCase().includes(searchText.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (sortField === "price") {
-          const comparison = a.value - b.value;
-          return sortOrder === "asc" ? comparison : -comparison;
-        } else {
-          const comparison = a.title ? a.title.localeCompare(b.title) : 0;
-          return sortOrder === "asc" ? comparison : -comparison;
-        }
-      });
-  }, [products, searchText, sortOrder, sortField]);
-
   return (
     <SafeAreaView className="flex-1 bg-primaria flex-col">
       <View className="w-full h-16 bg-secundaria-300">
@@ -183,12 +258,29 @@ const Home = () => {
 
       <View className="w-full h-[2px] bg-secundaria-700 mb-2" />
 
-      <View className="flex-1">
-        <Text className="font-bold text-2xl text-center mb-2">
-          Todos produtos
-        </Text>
-        <View className="w-full h-[1px] bg-secundaria-600 mb-2" />
+      <View className="w-full h-12 mt-2">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="px-4"
+        >
+          <CategoryButton
+            name="Todos"
+            isSelected={!selectedCategory}
+            onPress={() => setSelectedCategory(null)}
+          />
+          {categories.map((category) => (
+            <CategoryButton
+              key={category.id}
+              name={category.name}
+              isSelected={selectedCategory === category.id}
+              onPress={() => setSelectedCategory(category.id)}
+            />
+          ))}
+        </ScrollView>
+      </View>
 
+      <View className="flex-1">
         <FlatList
           data={filteredAndSortedProducts}
           keyExtractor={(item) => item.id}
@@ -202,47 +294,13 @@ const Home = () => {
             padding: 2,
           }}
           ListHeaderComponent={
-            <View className="px-4 mb-2 h-14 flex-row gap-2 justify-end items-end">
+            <View className="px-4 mb-2">
               <TextInput
-                className="flex-1 h-14 px-3 bg-white rounded border border-gray-300"
-                placeholder="Pesquisar produtos..."
+                className="h-12 px-3 bg-white rounded border border-gray-300"
+                placeholder="Buscar produto..."
                 value={searchText}
                 onChangeText={setSearchText}
               />
-              <View className="flex-col justify-center h-14 gap-[1px]">
-                <TouchableOpacity
-                  onPress={() => {
-                    setSortField("price");
-                    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-                  }}
-                  className="bg-secundaria-400 h-8 px-3 rounded"
-                >
-                  <Text className="text-secundaria-900 text-base">
-                    Preço:{" "}
-                    {sortField === "price"
-                      ? sortOrder === "asc"
-                        ? "↑"
-                        : "↓"
-                      : "-"}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setSortField("title");
-                    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-                  }}
-                  className="bg-secundaria-400 h-8 px-3 rounded"
-                >
-                  <Text className="text-secundaria-900 text-base">
-                    Nome:{" "}
-                    {sortField === "title"
-                      ? sortOrder === "asc"
-                        ? "↑"
-                        : "↓"
-                      : "-"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
           }
           ListEmptyComponent={() => (
@@ -257,24 +315,23 @@ const Home = () => {
         />
       </View>
 
-      <Animated.View
-        style={{
-          position: "absolute",
-          bottom: 24,
-          right: 24,
-          transform: [{ scale: scaleAnim }, { rotate }],
-        }}
+      {/* Botão do carrinho */}
+      <TouchableOpacity
+        className="absolute bottom-24 right-8 w-14 h-14 bg-green-500 rounded-full items-center justify-center"
+        onPress={() => router.push("/screens/Cart")}
       >
-        <TouchableOpacity
-          onPress={() => {
-            animateButton();
-            router.push("/criar");
-          }}
-          className="w-14 h-14 bg-blue-500 rounded-full items-center justify-center"
-        >
-          <Text className="text-white text-3xl">+</Text>
-        </TouchableOpacity>
-      </Animated.View>
+        <Text className="text-white font-bold">{cartCount}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
+          animateButton();
+          router.push("/criar");
+        }}
+        className="absolute right-8 bottom-8 w-14 h-14 bg-secundaria-500 rounded-full items-center justify-center"
+      >
+        <Text className="text-white text-3xl">+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

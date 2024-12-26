@@ -5,7 +5,7 @@ const ColorSelector = ({
   selectedColor,
   setSelectedColor,
   disabled,
-  onColorSelect, // Nova prop para callback
+  onColorSelect,
 }) => {
   const colors = [
     "#f9fafb",
@@ -26,13 +26,23 @@ const ColorSelector = ({
   };
 
   return (
-    <View className="flex-1 flex-row justify-between flex-wrap gap-2">
+    <View
+      style={{
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-evenly",
+        gap: 8, // Espaçamento entre os itens
+      }}
+    >
       {colors.map((color) => (
         <TouchableOpacity
           key={color}
-          className="min-h-12 min-w-12 max-h-14 max-w-14 rounded-md"
           style={{
+            width: "20%",
+            height: "20%", // Ajusta o tamanho dos botões proporcionalmente
+            aspectRatio: 1, // Mantém os botões quadrados
             backgroundColor: color,
+            borderRadius: 8,
             borderWidth: selectedColor === color ? 2 : 0,
             borderColor: selectedColor === color ? "#ffffff" : "transparent",
             opacity: disabled ? 0.5 : 1,

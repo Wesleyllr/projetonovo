@@ -109,7 +109,7 @@ const Criar = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-primaria">
       <Header onGoBack={handleGoBack} />
       <ScrollView className="flex-1 bg-primaria" nestedScrollEnabled={true}>
         <FormFieldProduct
@@ -165,7 +165,7 @@ const Criar = () => {
           otherStyles="px-4"
         />
 
-        <View className="w-full h-40 mt-2 bg-slate-700 justify-center items-center flex-row px-4">
+        <View className="w-full h-40 mt-2 justify-center items-center flex-row px-4 gap-2">
           {selectedImage ? (
             <Image
               source={{ uri: selectedImage }}
@@ -173,7 +173,7 @@ const Criar = () => {
               contentFit="contain"
             />
           ) : (
-            <View className="w-40 h-40 rounded-xl bg-secundaria-300 justify-center items-center">
+            <View className="w-36 h-36 rounded-xl bg-secundaria-300 justify-center items-center ">
               {selectedColor ? (
                 <View
                   className="w-full h-full rounded-xl"
@@ -192,7 +192,7 @@ const Criar = () => {
               )}
             </View>
           )}
-          <View className="flex-1 h-40 bg-secundaria-300">
+          <View className="flex-1 h-36 bg-secundaria-300 border border-secundaria-700 rounded-xl justify-center">
             <ColorSelector
               selectedColor={selectedColor}
               setSelectedColor={setSelectedColor}

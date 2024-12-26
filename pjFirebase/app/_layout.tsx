@@ -13,7 +13,6 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 
-// Previne que a tela de splash se esconda automaticamente antes de carregar os ativos.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -34,12 +33,25 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "light" ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "slide_from_right",
+          contentStyle: { backgroundColor: "white" },
+        }}
+      >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="screens"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+          }}
+        />
         <Stack.Screen name="index" options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={colorScheme === "light" ? "dark" : "light"} />
     </ThemeProvider>
   );
 }
