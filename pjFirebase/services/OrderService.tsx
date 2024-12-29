@@ -7,22 +7,28 @@ export class OrderService {
   private static ORDERS_COLLECTION = "orders";
 
   static async createOrder(items: ICartItem[], total: number): Promise<string> {
-    const userId = auth.currentUser?.uid;
-    if (!userId) throw new Error("User not authenticated");
+    try {
+      const userId = auth.currentUser?.uid;
+      if (!userId) throw new Error("User not authenticated");
 
-    const orderData: Omit<IOrder, "id"> = {
-      userId,
-      items,
-      total,
-      status: "completed",
-      createdAt: new Date(),
-    };
+      const orderData: Omit<IOrder, "id"> = {
+        userId,
+        items,
+        total,
+        status: "completed",
+        createdAt: new Date(),
+      };
 
-    const orderRef = await addDoc(collection(db, this.ORDERS_COLLECTION), {
-      ...orderData,
-      createdAt: Timestamp.fromDate(orderData.createdAt),
-    });
+      const orderRef = await addDoc(collection(db, this.ORDERS_COLLECTION), {
+        ...orderData,
+        createdAt: Timestamp.fromDate(orderData.createdAt),
+      });
 
-    return orderRef.id;
+      console.log(`Pedido criado com sucesso: ${orderRef.id}`); // Sucesso
+      return orderRef.id;
+    } catch (error: any) {
+      console.error("Erro ao criar pedido:", error); // Logando erro
+      throw new Error(`Erro ao criar pedido: ${error.message || error}`);
+    }
   }
 }

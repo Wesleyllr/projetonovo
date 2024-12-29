@@ -67,7 +67,7 @@ export default function Cart() {
       Alert.alert("Sucesso", `Pedido #${orderId} finalizado!`);
       router.push("/");
     } catch (error) {
-      Alert.alert("Erro", "Falha ao finalizar pedido");
+      Alert.alert("Erro", error);
     }
   };
 
