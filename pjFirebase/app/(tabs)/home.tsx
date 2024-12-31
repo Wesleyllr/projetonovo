@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -18,6 +19,9 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { images } from "@/constants";
+import { getUserInfo } from "@/userService"; // Importando o serviço para obter o username
 
 const Home = () => {
   const router = useRouter();
@@ -29,12 +33,25 @@ const Home = () => {
   const [pendingOrders, setPendingOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    photoURL: null,
+  });
 
   const fetchData = useCallback(async () => {
     try {
-      const userId = auth.currentUser?.uid;
-      if (!userId) return;
+      const user = auth.currentUser;
+      if (!user) return;
 
+      const userId = user.uid;
+
+      // Recuperar username pelo método reutilizável
+      const username = await getUserInfo("username");
+      const photoURL = user.photoURL || null;
+
+      setUserInfo({ name: username, photoURL });
+
+      // Carregar dados de pedidos
       const now = new Date();
       const dayStart = new Date(now.setHours(0, 0, 0, 0));
       const weekStart = new Date(now.setDate(now.getDate() - 7));
@@ -110,6 +127,53 @@ const Home = () => {
     </TouchableOpacity>
   );
 
+  const formatDateTime = (timestamp) => {
+    const date = timestamp.toDate();
+    return {
+      date: date.toLocaleDateString("pt-BR"),
+      time: date.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+  };
+
+  const OrderCard = ({ order }) => {
+    const { date, time } = formatDateTime(order.createdAt);
+    const totalQuantity = order.items.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+
+    return (
+      <View className="bg-secundaria-50 p-4 rounded-lg mb-2">
+        <View className="flex-row justify-between mb-2">
+          <Text className="flex-1 text-secundaria-900 font-bold">
+            Pedido #{order.id.slice(-6)}
+          </Text>
+          <Text className="text-quinta font-bold">
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(order.total)}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between">
+          <View>
+            <Text className="text-quinta text-sm">{date}</Text>
+            <Text className="text-quinta text-sm">{time}</Text>
+          </View>
+          <View className="items-end">
+            <Text className="text-quinta text-sm">
+              {totalQuantity} unidades
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-primaria">
       <ScrollView
@@ -118,6 +182,31 @@ const Home = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        <View className="w-full h-16">
+          {loading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <View className="flex-1 flex-row px-2 py-2 gap-2">
+              <Text className="flex-1 font-thin text-2xl text-secundaria-900">
+                Olá, {userInfo.name}
+              </Text>
+              <TouchableOpacity onPress={() => router.push("/perfil")}>
+                <Image
+                  className="w-12 h-12 border-2 border-secundaria-700 rounded-full"
+                  source={
+                    userInfo.photoURL
+                      ? { uri: userInfo.photoURL }
+                      : images.profile
+                  }
+                  contentFit="cover"
+                  transition={500}
+                  cachePolicy="memory-disk"
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+        <View className="w-full h-[2px] bg-secundaria-700 mb-2" />
         <View className="flex-row items-center justify-between mb-6">
           <Text className="text-2xl font-bold text-secundaria-900">
             Dashboard
@@ -129,7 +218,6 @@ const Home = () => {
             <Ionicons name="notifications-outline" size={20} color="#7f5d5a" />
           </TouchableOpacity>
         </View>
-
         <View className="flex-row mb-6">
           <StatCard title="Hoje" value={salesData.daily} />
           <StatCard title="Semana" value={salesData.weekly} />
@@ -151,7 +239,7 @@ const Home = () => {
             <QuickAction
               icon={<Ionicons name="cube-outline" size={20} color="#7f5d5a" />}
               title="Pedidos"
-              onPress={() => router.push("/pedidos")}
+              onPress={() => router.push("/screens/pedidos")}
             />
             <QuickAction
               icon={
@@ -169,27 +257,13 @@ const Home = () => {
             />
           </View>
         </View>
-
         <View className="mb-6">
           <Text className="text-xl font-bold text-secundaria-900 mb-4">
             Pedidos Pendentes
           </Text>
           {pendingOrders.length > 0 ? (
             pendingOrders.map((order) => (
-              <View
-                key={order.id}
-                className="bg-secundaria-50 p-4 rounded-lg mb-2"
-              >
-                <Text className="text-secundaria-900 font-bold">
-                  Pedido #{order.id.slice(-6)}
-                </Text>
-                <Text className="text-quinta">
-                  {new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  }).format(order.total)}
-                </Text>
-              </View>
+              <OrderCard key={order.id} order={order} />
             ))
           ) : (
             <Text className="text-quinta text-center p-4">

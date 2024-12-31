@@ -6,7 +6,11 @@ import { ICartItem, IOrder } from "@/types/CartTypes";
 export class OrderService {
   private static ORDERS_COLLECTION = "orders";
 
-  static async createOrder(items: ICartItem[], total: number): Promise<string> {
+  static async createOrder(
+    items: ICartItem[],
+    total: number,
+    status: "completed" | "pending"
+  ): Promise<string> {
     try {
       const userId = auth.currentUser?.uid;
       if (!userId) throw new Error("User not authenticated");
@@ -15,7 +19,7 @@ export class OrderService {
         userId,
         items,
         total,
-        status: "completed",
+        status,
         createdAt: new Date(),
       };
 
@@ -24,10 +28,10 @@ export class OrderService {
         createdAt: Timestamp.fromDate(orderData.createdAt),
       });
 
-      console.log(`Pedido criado com sucesso: ${orderRef.id}`); // Sucesso
+      console.log(`Pedido criado com sucesso: ${orderRef.id}`);
       return orderRef.id;
     } catch (error: any) {
-      console.error("Erro ao criar pedido:", error); // Logando erro
+      console.error("Erro ao criar pedido:", error);
       throw new Error(`Erro ao criar pedido: ${error.message || error}`);
     }
   }

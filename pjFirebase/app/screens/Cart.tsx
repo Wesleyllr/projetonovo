@@ -60,11 +60,12 @@ export default function Cart() {
     }
   };
 
-  const handleFinishOrder = async () => {
+  const handleOrder = async (status: "completed" | "pending") => {
     try {
-      const orderId = await OrderService.createOrder(items, total);
+      const orderId = await OrderService.createOrder(items, total, status);
       await CartService.clearCart();
-      Alert.alert("Sucesso", `Pedido #${orderId} finalizado!`);
+      const statusText = status === "completed" ? "finalizado" : "em aberto";
+      Alert.alert("Sucesso", `Pedido #${orderId} ${statusText}!`);
       router.push("/");
     } catch (error) {
       Alert.alert("Erro", error);
@@ -126,15 +127,26 @@ export default function Cart() {
           }).format(total)}
         </Text>
 
-        <TouchableOpacity
-          onPress={handleFinishOrder}
-          className="bg-quarta p-4 rounded-lg"
-          disabled={items.length === 0}
-        >
-          <Text className="text-primaria text-center font-bold text-lg">
-            Finalizar Pedido
-          </Text>
-        </TouchableOpacity>
+        <View className="flex-row gap-2">
+          <TouchableOpacity
+            onPress={() => handleOrder("pending")}
+            className="flex-1 bg-terceira-500 p-4 rounded-lg"
+            disabled={items.length === 0}
+          >
+            <Text className="text-primaria text-center font-bold text-lg">
+              Deixar em Aberto
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleOrder("completed")}
+            className="flex-1 bg-quarta p-4 rounded-lg"
+            disabled={items.length === 0}
+          >
+            <Text className="text-primaria text-center font-bold text-lg">
+              Finalizar Pedido
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );

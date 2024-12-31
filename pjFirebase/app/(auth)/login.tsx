@@ -73,7 +73,7 @@ const Login = () => {
       const userInfo = await getUserInfo("nome"); // Exemplo: obtém o campo "nome"
 
       // Redireciona para a tela Home
-      router.push("/home");
+      router.replace("/home");
     } catch (error) {
       const friendlyMessage = getFriendlyErrorMessage(error.code);
       Alert.alert("Erro", friendlyMessage);
@@ -85,7 +85,7 @@ const Login = () => {
   return (
     <SafeAreaView className="w-full h-full justify-center items-center">
       <LinearGradient
-        colors={["#effaff", "#78dcff"]}
+        colors={["#faeaed", "#e07c8f"]}
         className="absolute inset-0 w-full h-full"
       />
       <View className="w-full h-full justify-center items-center px-4">
@@ -123,6 +123,14 @@ const Login = () => {
         <TouchableOpacity className="mt-4">
           <Text className="text-secundaria-800 font-pregular text-sm">
             Esqueceu a senha?
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="mt-4"
+          onPress={() => router.push("/cadastrarUsuario")}
+        >
+          <Text className="text-secundaria-800 font-pregular text-sm">
+            Não tenho conta
           </Text>
         </TouchableOpacity>
       </View>

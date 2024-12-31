@@ -119,7 +119,7 @@ const Cadastro = ({ navigation }) => {
   return (
     <SafeAreaView className="w-full h-full">
       <LinearGradient
-        colors={["#effaff", "#78dcff"]}
+        colors={["#faeaed", "#e07c8f"]}
         className="absolute inset-0 w-full h-full "
       />
       <ScrollView
