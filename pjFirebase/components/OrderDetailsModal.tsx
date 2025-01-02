@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Modal, View, Text, TouchableOpacity, FlatList } from "react-native";
-import { IOrder, ICartItem } from "@/types/CartTypes";
+import { IOrder, ICartItem } from "@/types/types";
 import { CONSTANTS } from "@/constants/constants";
 
 interface OrderDetailsModalProps {

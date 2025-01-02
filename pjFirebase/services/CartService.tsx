@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ICartItem } from "@/types/CartTypes";
+import { ICartItem } from "@/types/types";
 
 export class CartService {
   private static CART_KEY = "@cart_items";

@@ -5,8 +5,9 @@ import { useRouter } from "expo-router";
 import { CartItem } from "@/components/CartItem";
 import { CartService } from "@/services/CartService";
 import { OrderService } from "@/services/OrderService";
-import { ICartItem } from "@/types/CartTypes";
+import { ICartItem } from "@/types/types";
 import { CompactCartItem } from "@/components/CompactCartItem";
+import Header from "@/components/CustomHeader";
 
 export default function Cart() {
   const router = useRouter();
@@ -23,6 +24,10 @@ export default function Cart() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoBack = () => {
+    router.back();
   };
 
   useEffect(() => {
@@ -79,17 +84,13 @@ export default function Cart() {
 
   return (
     <SafeAreaView className="flex-1 bg-primaria">
-      <View className="p-4 bg-secundaria-500 flex-row justify-between items-center">
-        <Text className="text-2xl font-bold text-primaria">Carrinho</Text>
-        <TouchableOpacity
-          onPress={() => setIsCompactView(!isCompactView)}
-          className="bg-secundaria-600 px-3 py-1 rounded-lg"
-        >
-          <Text className="text-primaria text-lg">
-            {isCompactView ? "≣" : "≡"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <Header 
+        title="Carrinho" 
+        onGoBack={handleGoBack} 
+        isCompactView={isCompactView}
+        onToggleView={() => setIsCompactView(!isCompactView)}
+      />
+
 
       <FlatList
         data={items}

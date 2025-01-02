@@ -10,8 +10,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
-import { IOrder } from "@/types/CartTypes";
-import { OrderStatus } from "@/types/OrderStatus";
+import { IOrder } from "@/types/types";
+import { OrderStatus } from "@/types/types";
 import { useOrders } from "@/hooks/useOrders";
 import OrderCard from "@/components/OrderCard";
 import OrderDetailsModal from "@/components/OrderDetailsModal";

@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { IOrder } from "@/types/CartTypes";
-import { OrderStatus } from "@/types/OrderStatus";
+import { IOrder } from "@/types/types";
+import { OrderStatus } from "@/types/types";
 import { formatCurrency, formatDateHour } from "@/utils/formatters";
 import { CONSTANTS } from "@/constants/constants";
 

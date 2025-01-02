@@ -110,7 +110,13 @@ const Criar = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-primaria">
-      <Header onGoBack={handleGoBack} />
+      <Header 
+      title="Novo Produto" 
+      onGoBack={handleGoBack}
+      onSave={handleAddProduct} 
+      showSaveIcon={true} 
+      />
+
       <ScrollView className="flex-1 bg-primaria" nestedScrollEnabled={true}>
         <FormFieldProduct
           title="Novo Produto"

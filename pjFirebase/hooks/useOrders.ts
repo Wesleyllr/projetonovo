@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Alert } from "react-native";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db, auth } from "@/firebaseConfig";
-import { IOrder } from "@/types/CartTypes";
+import { IOrder } from "@/types/types";
 
 export const useOrders = (showPending: boolean) => {
   const [orders, setOrders] = useState<IOrder[]>([]);
