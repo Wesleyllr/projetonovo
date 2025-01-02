@@ -66,9 +66,9 @@ export default function Cart() {
       await CartService.clearCart();
       const statusText = status === "completed" ? "finalizado" : "em aberto";
       Alert.alert("Sucesso", `Pedido #${orderId} ${statusText}!`);
-      router.push("/");
+      router.back();
     } catch (error) {
-      Alert.alert("Erro", error);
+      Alert.alert("Erro", error.message || error);
     }
   };
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Platform } from "react-native";
 import {
   View,
   Text,
@@ -8,9 +9,9 @@ import {
   FlatList,
   RefreshControl,
   Animated,
-  Easing,
   TextInput,
   ScrollView,
+  useWindowDimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -38,10 +39,32 @@ const Vender = () => {
   const [searchText, setSearchText] = useState("");
   const [cartCount, setCartCount] = useState(0);
   const navigation = useNavigation();
-
+  const { width } = useWindowDimensions();
   const scaleAnim = new Animated.Value(1);
   const opacityAnim = new Animated.Value(1);
   const translateYAnim = new Animated.Value(0);
+
+  const getNumColumns = () => {
+    if (Platform.OS === "web") {
+      if (width > 1400) return 6; // Telas muito grandes
+      if (width > 1100) return 5; // Telas grandes
+      if (width > 800) return 4; // Telas médias
+      return 3; // Telas pequenas
+    }
+    return 3; // Mobile (iOS/Android)
+  };
+
+  const numColumns = getNumColumns();
+
+  const columnWrapperStyle = useMemo(
+    () => ({
+      justifyContent: "flex-start" as "flex-start", // Declara explicitamente o tipo
+      marginBottom: 16,
+      gap: 16,
+      paddingHorizontal: Platform.OS === "web" ? 16 : 8,
+    }),
+    []
+  );
 
   const animateButton = () => {
     Animated.sequence([
@@ -224,15 +247,23 @@ const Vender = () => {
     }
   };
 
-  const renderProduct = ({ item }) => (
-    <CardProduto1
-      title={item.title}
-      price={item.value}
-      imageSource={item.imageUrl ? { uri: item.imageUrl } : null}
-      backgroundColor={item.backgroundColor}
-      onPress={() => handleProductPress(item)}
-    />
+  const renderProduct = ({ item, index }) => (
+    <View
+      style={{
+        flex: Platform.OS === "web" ? 1 : undefined,
+        maxWidth: Platform.OS === "web" ? `${100 / numColumns}%` : undefined,
+      }}
+    >
+      <CardProduto1
+        title={item.title}
+        price={item.value}
+        imageSource={item.imageUrl ? { uri: item.imageUrl } : null}
+        backgroundColor={item.backgroundColor}
+        onPress={() => handleProductPress(item)}
+      />
+    </View>
   );
+
   return (
     <SafeAreaView className="flex-1 bg-primaria flex-col">
       <View className="w-full h-16 bg-secundaria-300">
@@ -285,16 +316,18 @@ const Vender = () => {
           data={filteredAndSortedProducts}
           keyExtractor={(item) => item.id}
           renderItem={renderProduct}
-          numColumns={3}
-          columnWrapperStyle={{
-            justifyContent: "space-around",
-            marginBottom: 16,
-          }}
+          numColumns={numColumns}
+          key={numColumns} // Força recriação do FlatList quando muda o número de colunas
+          columnWrapperStyle={columnWrapperStyle}
           contentContainerStyle={{
-            padding: 2,
+            padding: Platform.OS === "web" ? 16 : 2,
           }}
           ListHeaderComponent={
-            <View className="px-4 mb-2">
+            <View
+              className={`px-4 mb-2 ${
+                Platform.OS === "web" ? "w-full mx-auto" : ""
+              }`}
+            >
               <TextInput
                 className="h-12 px-3 bg-white rounded border border-gray-300"
                 placeholder="Buscar produto..."

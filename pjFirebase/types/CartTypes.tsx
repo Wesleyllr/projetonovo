@@ -6,15 +6,15 @@ export interface IProduct {
   quantity: number;
 }
 
-interface ICartItem extends IProduct {
+export interface ICartItem extends IProduct {
   observations?: string;
 }
 
-interface IOrder {
+export interface IOrder {
   id: string;
   userId: string;
   items: ICartItem[];
   total: number;
-  status: "completed" | "pending";
+  status: "completed" | "pending" | "canceled";
   createdAt: Date;
 }

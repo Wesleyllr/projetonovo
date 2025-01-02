@@ -9,7 +9,7 @@ export class OrderService {
   static async createOrder(
     items: ICartItem[],
     total: number,
-    status: "completed" | "pending"
+    status: "completed" | "pending" | "canceled"
   ): Promise<string> {
     try {
       const userId = auth.currentUser?.uid;
@@ -28,10 +28,10 @@ export class OrderService {
         createdAt: Timestamp.fromDate(orderData.createdAt),
       });
 
-      console.log(`Pedido criado com sucesso: ${orderRef.id}`);
+      console.log(`Pedido criado com sucesso: ${orderRef.id}`); // Sucesso
       return orderRef.id;
     } catch (error: any) {
-      console.error("Erro ao criar pedido:", error);
+      console.error("Erro ao criar pedido:", error); // Logando erro
       throw new Error(`Erro ao criar pedido: ${error.message || error}`);
     }
   }

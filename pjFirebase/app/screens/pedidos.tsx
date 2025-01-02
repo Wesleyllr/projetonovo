@@ -1,129 +1,70 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, FlatList, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useCallback } from "react";
 import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
-import { db, auth } from "@/firebaseConfig";
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebaseConfig";
 import { IOrder } from "@/types/CartTypes";
 import { OrderStatus } from "@/types/OrderStatus";
+import { useOrders } from "@/hooks/useOrders";
+import OrderCard from "@/components/OrderCard";
+import OrderDetailsModal from "@/components/OrderDetailsModal";
 
-export default function Orders() {
-  const [orders, setOrders] = useState<IOrder[]>([]);
+export default function Pedidos() {
   const [showPending, setShowPending] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // Estado para refresh
+  const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const fetchOrders = useCallback(async () => {
-    try {
-      const userId = auth.currentUser?.uid;
-      if (!userId) return;
+  const { orders, loading, refreshing, setRefreshing, fetchOrders } =
+    useOrders(showPending);
 
-      const ordersRef = collection(db, "orders");
-      const status = showPending ? "pending" : "completed";
-      const q = query(
-        ordersRef,
-        where("userId", "==", userId),
-        where("status", "==", status)
-      );
+  const updateOrderStatus = useCallback(
+    async (orderId: string, newStatus: OrderStatus) => {
+      setIsUpdating(true);
+      try {
+        const orderRef = doc(db, "orders", orderId);
+        await updateDoc(orderRef, { status: newStatus });
+        await fetchOrders();
+        Alert.alert("Sucesso", "Status do pedido atualizado com sucesso");
+      } catch (error) {
+        Alert.alert(
+          "Erro ao atualizar status",
+          error instanceof Error ? error.message : "Erro desconhecido"
+        );
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [fetchOrders]
+  );
 
-      const querySnapshot = await getDocs(q);
-      const ordersData = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as IOrder)
-      );
+  const handleOrderPress = useCallback((order: IOrder) => {
+    setSelectedOrder(order);
+    setIsModalVisible(true);
+  }, []);
 
-      setOrders(ordersData);
-    } catch (error) {
-      Alert.alert("Erro", "Falha ao carregar pedidos");
-    } finally {
-      setLoading(false);
-      setRefreshing(false); // Finaliza o estado de refresh
-    }
-  }, [showPending]);
+  const handleCloseModal = useCallback(() => {
+    setIsModalVisible(false);
+    setSelectedOrder(null);
+  }, []);
 
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchOrders();
-  };
-
-  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
-    try {
-      const orderRef = doc(db, "orders", orderId);
-      await updateDoc(orderRef, { status: newStatus });
-      await fetchOrders();
-      Alert.alert("Sucesso", "Status do pedido atualizado");
-    } catch (error) {
-      Alert.alert("Erro", "Falha ao atualizar status do pedido");
-    }
-  };
-
-  const OrderCard = ({ order }: { order: IOrder }) => {
-    const formattedDate = new Date(order.createdAt).toLocaleDateString("pt-BR");
-    const totalItems = order.items.reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    );
-
-    return (
-      <View className="bg-secundaria-50 p-4 rounded-lg mb-3">
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-secundaria-900 font-bold">
-            Pedido #{order.id.slice(-6)}
-          </Text>
-          <Text className="text-quinta">
-            {new Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(order.total)}
-          </Text>
-        </View>
-
-        <View className="mb-2">
-          <Text className="text-quinta">{formattedDate}</Text>
-          <Text className="text-quinta">{totalItems} itens</Text>
-        </View>
-
-        <View className="flex-row justify-end gap-2">
-          {order.status === "pending" ? (
-            <>
-              <TouchableOpacity
-                onPress={() => updateOrderStatus(order.id, "completed")}
-                className="bg-quarta px-4 py-2 rounded"
-              >
-                <Text className="text-primaria">Completar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => updateOrderStatus(order.id, "canceled")}
-                className="bg-sexta px-4 py-2 rounded"
-              >
-                <Text className="text-primaria">Cancelar</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity
-              onPress={() => updateOrderStatus(order.id, "canceled")}
-              className="bg-sexta px-4 py-2 rounded"
-            >
-              <Text className="text-primaria">Cancelar</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    );
-  };
+  const memoizedRenderItem = useCallback(
+    ({ item }: { item: IOrder }) => (
+      <OrderCard
+        order={item}
+        onPress={handleOrderPress}
+        onStatusUpdate={updateOrderStatus}
+      />
+    ),
+    [handleOrderPress, updateOrderStatus]
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-primaria">
@@ -137,6 +78,7 @@ export default function Orders() {
           className={`flex-1 p-2 rounded-l-lg ${
             showPending ? "bg-secundaria-500" : "bg-secundaria-200"
           }`}
+          accessibilityLabel="Ver pedidos pendentes"
         >
           <Text
             className={`text-center ${
@@ -152,30 +94,50 @@ export default function Orders() {
           className={`flex-1 p-2 rounded-r-lg ${
             !showPending ? "bg-secundaria-500" : "bg-secundaria-200"
           }`}
+          accessibilityLabel="Ver pedidos Finalizados"
         >
           <Text
             className={`text-center ${
               !showPending ? "text-primaria" : "text-secundaria-700"
             }`}
           >
-            Completados
+            Finalizados
           </Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={orders}
-        renderItem={({ item }) => <OrderCard order={item} />}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        refreshing={refreshing} // Adiciona estado de refresh
-        onRefresh={onRefresh} // Função chamada ao arrastar para baixo
-        ListEmptyComponent={
-          <Text className="text-center text-quinta">
-            Nenhum pedido {showPending ? "pendente" : "completado"}
-          </Text>
-        }
+      {loading ? (
+        <ActivityIndicator size="large" className="flex-1" color="#C1AAA8" />
+      ) : (
+        <FlatList
+          data={orders}
+          renderItem={memoizedRenderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16 }}
+          refreshing={refreshing}
+          onRefresh={() => {
+            setRefreshing(true);
+            fetchOrders();
+          }}
+          ListEmptyComponent={
+            <Text className="text-center text-quinta">
+              Nenhum pedido {showPending ? "pendente" : "completado"}
+            </Text>
+          }
+        />
+      )}
+
+      <OrderDetailsModal
+        isVisible={isModalVisible}
+        order={selectedOrder}
+        onClose={handleCloseModal}
       />
+
+      {isUpdating && (
+        <View className="absolute inset-0 bg-black/30 justify-center items-center">
+          <ActivityIndicator size="large" color="#C1AAA8" />
+        </View>
+      )}
     </SafeAreaView>
   );
 }

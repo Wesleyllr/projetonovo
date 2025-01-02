@@ -115,12 +115,21 @@ const Home = () => {
     </View>
   );
 
-  const QuickAction = ({ icon, title, onPress }) => (
+  const QuickAction = ({ icon, title, onPress, badgeCount }) => (
     <TouchableOpacity
       onPress={onPress}
       className="bg-secundaria-100 p-2 rounded-lg flex items-center justify-center w-18 h-18 m-2"
     >
-      {icon}
+      <View className="relative">
+        {icon}
+        {badgeCount > 0 && (
+          <View className="absolute -top-2 -right-4 bg-red-500 rounded-full min-w-5 h-5 flex items-center justify-center">
+            <Text className="text-white text-xs font-bold">
+              {badgeCount > 99 ? "99+" : badgeCount}
+            </Text>
+          </View>
+        )}
+      </View>
       <Text className="text-secundaria-700 text-sm mt-2 text-center">
         {title}
       </Text>
@@ -240,6 +249,7 @@ const Home = () => {
               icon={<Ionicons name="cube-outline" size={20} color="#7f5d5a" />}
               title="Pedidos"
               onPress={() => router.push("/screens/pedidos")}
+              badgeCount={pendingOrders.length} // Usando o length dos pedidos pendentes
             />
             <QuickAction
               icon={
