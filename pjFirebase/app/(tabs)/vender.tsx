@@ -58,7 +58,7 @@ const Vender = () => {
 
   const columnWrapperStyle = useMemo(
     () => ({
-      justifyContent: "flex-start" as "flex-start", // Declara explicitamente o tipo
+      justifyContent: Platform.OS === "web" ? "flex-start" as "flex-start" : "space-around" as "space-around",// Declara explicitamente o tipo
       marginBottom: 16,
       gap: 16,
       paddingHorizontal: Platform.OS === "web" ? 16 : 8,
@@ -266,28 +266,6 @@ const Vender = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-primaria flex-col">
-      <View className="w-full h-16 bg-secundaria-300">
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
-          <View className="flex-1 bg-secundaria-200 flex-row px-2 py-2 gap-2">
-            <Text className="flex-1 font-thin text-2xl text-secundaria-900">
-              Olá, {userInfo}
-            </Text>
-            <TouchableOpacity onPress={() => router.push("/perfil")}>
-              <Image
-                className="w-12 h-12 bg-white border-2 border-secundaria-700 rounded-full"
-                source={images.profile}
-                contentFit="cover"
-                transition={500}
-                cachePolicy="memory-disk"
-              />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-
-      <View className="w-full h-[2px] bg-secundaria-700 mb-2" />
 
       <View className="w-full h-12 mt-2">
         <ScrollView
