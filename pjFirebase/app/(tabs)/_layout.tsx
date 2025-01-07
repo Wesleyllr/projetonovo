@@ -1,6 +1,7 @@
 import { View, Text, Image } from "react-native";
 import { Tabs } from "expo-router";
 import { icons } from "../../constants";
+import { Icon } from "react-native-elements";
 
 type TabIconProps = {
   icon: any;
@@ -93,6 +94,21 @@ const TabsLayout = () => {
         name="perfil"
         options={{
           title: "Perfil",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.profile}
+              color={color}
+              name="Perfil"
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: "dash",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon

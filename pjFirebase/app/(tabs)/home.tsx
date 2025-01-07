@@ -45,22 +45,22 @@ const Home = () => {
 
       const userId = user.uid;
 
-      // Recuperar username pelo método reutilizável
+      // Recuperar username e foto do usuário
       const username = await getUserInfo("username");
       const photoURL = user.photoURL || null;
 
       setUserInfo({ name: username, photoURL });
 
-      // Carregar dados de pedidos
+      // Datas de referência
       const now = new Date();
       const dayStart = new Date(now.setHours(0, 0, 0, 0));
       const weekStart = new Date(now.setDate(now.getDate() - 7));
       const monthStart = new Date(now.setDate(1));
 
-      const ordersRef = collection(db, "orders");
+      // Referência à subcoleção 'vendas'
+      const vendasRef = collection(db, "orders", userId, "vendas");
       const q = query(
-        ordersRef,
-        where("userId", "==", userId),
+        vendasRef,
         where("createdAt", ">=", Timestamp.fromDate(monthStart))
       );
 
@@ -87,6 +87,7 @@ const Home = () => {
       setSalesData({ daily, weekly, monthly });
       setPendingOrders(pending);
     } catch (error) {
+      console.error("Erro ao carregar dados:", error);
       Alert.alert("Erro", "Falha ao carregar dados");
     } finally {
       setLoading(false);
@@ -104,8 +105,8 @@ const Home = () => {
   };
 
   const StatCard = ({ title, value }) => (
-    <View className="bg-secundaria-50 p-4 rounded-lg flex-1 mx-2">
-      <Text className="text-quinta text-sm">{title}</Text>
+    <View className="bg-secundaria-50 p-4 rounded-lg flex-1 mx-1">
+      <Text className="text-quinta text-sm ">{title}</Text>
       <Text className="text-secundaria-900 text-lg font-bold">
         {new Intl.NumberFormat("pt-BR", {
           style: "currency",
@@ -193,7 +194,7 @@ const Home = () => {
       >
         <View className="w-full h-16">
           {loading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
+            <ActivityIndicator size="large" className="color-secundaria-700" />
           ) : (
             <View className="flex-1 flex-row px-2 py-2 gap-2">
               <Text className="flex-1 font-thin text-2xl text-secundaria-900">
@@ -256,7 +257,7 @@ const Home = () => {
                 <Ionicons name="archive-outline" size={20} color="#7f5d5a" />
               }
               title="Histórico"
-              onPress={() => router.push("/historico")}
+              onPress={() => router.push("/dashboard")}
             />
             <QuickAction
               icon={

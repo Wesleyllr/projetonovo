@@ -94,7 +94,7 @@ const CategoryDropdown = ({ value: selectedValue, onChange }) => {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#374151" />
+        <ActivityIndicator size="large" className="color-secundaria-700" />
         <Text>Carregando categorias...</Text>
       </View>
     );

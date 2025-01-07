@@ -1,30 +1,39 @@
-import "../setupNativewind"; // Adicione esta linha no topo do arquivo
-import React, { useEffect } from "react";
+import "../setupNativewind";
+import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/firebaseConfig"; // Certifique-se de que o Firebase está configurado corretamente
+import { auth } from "@/firebaseConfig";
 import { Platform } from "react-native";
 import { images } from "@/constants";
 
 const IndexScreen = () => {
   const router = useRouter();
+  const [initialCheckCompleted, setInitialCheckCompleted] = useState(false);
 
   useEffect(() => {
-    // Verifica o estado de autenticação assim que o componente for montado
+    const timer = setTimeout(() => {
+      // Marca o estado inicial como verificado após 3 segundos
+      setInitialCheckCompleted(true);
+    }, 3000);
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Usuário autenticado, redireciona para a HomeScreen
-        router.replace("/(tabs)/home");
-      } else {
-        // Usuário não autenticado, redireciona para a LoginScreen
-        router.replace("/(auth)/login");
+      if (initialCheckCompleted) {
+        // Após os 3 segundos, redireciona baseado no estado do usuário
+        if (user) {
+          router.replace("/(tabs)/home");
+        } else {
+          router.replace("/(auth)/login");
+        }
       }
     });
 
-    // Limpa o ouvinte quando o componente for desmontado
-    return () => unsubscribe();
-  }, [router]);
+    // Limpa o temporizador e o ouvinte quando o componente for desmontado
+    return () => {
+      clearTimeout(timer);
+      unsubscribe();
+    };
+  }, [initialCheckCompleted, router]);
 
   return (
     <View className="flex-1 justify-center items-center bg-white">
@@ -33,7 +42,7 @@ const IndexScreen = () => {
       <Text className="text-2xl font-bold text-center">
         Estamos verificando o Login...
       </Text>
-      <ActivityIndicator size="large" color="#0000ff" />
+      <ActivityIndicator size="large" className="color-secundaria-700" />
     </View>
   );
 };

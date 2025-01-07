@@ -107,7 +107,7 @@ export default function Pedidos() {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" className="flex-1" color="#C1AAA8" />
+        <ActivityIndicator size="large" className="color-secundaria-700" />
       ) : (
         <FlatList
           data={orders}
@@ -135,7 +135,7 @@ export default function Pedidos() {
 
       {isUpdating && (
         <View className="absolute inset-0 bg-black/30 justify-center items-center">
-          <ActivityIndicator size="large" color="#C1AAA8" />
+          <ActivityIndicator size="large" className="color-secundaria-700" />
         </View>
       )}
     </SafeAreaView>

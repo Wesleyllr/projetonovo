@@ -22,10 +22,18 @@ export class OrderService {
     };
 
     try {
-      const orderRef = await addDoc(collection(db, this.ORDERS_COLLECTION), {
+      // Referenciar a subcoleção `vendas` dentro do documento do usuário
+      const vendasCollection = collection(
+        db,
+        `${this.ORDERS_COLLECTION}/${userId}/vendas`
+      );
+
+      // Adicionar o documento à subcoleção `vendas`
+      const orderRef = await addDoc(vendasCollection, {
         ...orderData,
         createdAt: Timestamp.fromDate(orderData.createdAt),
       });
+
       return orderRef.id;
     } catch (error: any) {
       throw new Error(`Failed to create order: ${error.message}`);

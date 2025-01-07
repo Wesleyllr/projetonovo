@@ -117,7 +117,10 @@ const Login = () => {
 
         {/* Indicador de carregamento */}
         {loading && (
-          <ActivityIndicator size="large" color="#0000ff" className="mt-4" />
+          <ActivityIndicator
+            size="large"
+            className="color-secundaria-700 mt-4"
+          />
         )}
 
         <TouchableOpacity className="mt-4">

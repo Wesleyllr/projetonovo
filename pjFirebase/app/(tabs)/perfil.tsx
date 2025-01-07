@@ -29,6 +29,8 @@ const Perfil = () => {
     recentSales: [],
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const user = auth.currentUser;
+  const userId = user.uid;
 
   useEffect(() => {
     loadUserInfo();
@@ -48,15 +50,12 @@ const Perfil = () => {
       const createdAt = auth.currentUser?.metadata.creationTime;
 
       // Buscar total de produtos
-      const productsQuery = query(
-        collection(db, `users/${auth.currentUser?.uid}/products`)
-      );
+      const productsQuery = query(collection(db, "orders", userId, "vendas"));
       const productsSnapshot = await getDocs(productsQuery);
 
       // Buscar vendas recentes
       const salesQuery = query(
-        collection(db, "orders"),
-        where("userId", "==", auth.currentUser?.uid),
+        collection(db, "orders", userId, "vendas"),
         where("status", "==", "completed")
       );
       const salesSnapshot = await getDocs(salesQuery);
@@ -120,7 +119,7 @@ const Perfil = () => {
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-primaria items-center justify-center">
-        <ActivityIndicator size="large" color="#7f5d5a" />
+        <ActivityIndicator size="large" className="color-secundaria-700" />
       </SafeAreaView>
     );
   }

@@ -197,7 +197,7 @@ const CreateProduct = () => {
         </View>
 
         {isUploading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" className="color-secundaria-700" />
         ) : (
           <CustomButton
             title="Adicionar Produto"

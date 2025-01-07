@@ -1,47 +1,66 @@
-import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+} from "firebase/firestore";
 import { db, auth } from "@/firebaseConfig";
-import { SalesMetric } from "../types/DashboardTypes";
+import { DashboardData, IOrder } from "@/types/types";
 
 export class DashboardService {
-  static async getDashboardData() {
+  static async getDashboardData(): Promise<DashboardData> {
     const userId = auth.currentUser?.uid;
-    if (!userId) throw new Error("User not authenticated");
+    if (!userId) throw new Error("Usuário não autenticado");
 
     const now = new Date();
-    const dayStart = new Date(now.setHours(0, 0, 0, 0));
-    const weekStart = new Date(now.setDate(now.getDate() - 7));
-    const monthStart = new Date(now.setDate(1));
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const ordersRef = collection(db, "orders");
-    const querySnapshot = await getDocs(
-      query(
-        ordersRef,
-        where("userId", "==", userId),
-        where("createdAt", ">=", Timestamp.fromDate(monthStart))
-      )
+    const ordersQuery = query(
+      ordersRef,
+      where("userId", "==", userId),
+      where("status", "==", "completed")
     );
 
-    const orders = querySnapshot.docs.map(doc => ({
+    const querySnapshot = await getDocs(ordersQuery);
+    const orders = querySnapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
-    }));
+      ...doc.data(),
+    })) as IOrder[];
 
-    let daily = 0, weekly = 0, monthly = 0;
-    orders.forEach(order => {
-      const orderDate = order.createdAt.toDate();
-      if (orderDate >= dayStart) daily += order.total;
-      if (orderDate >= weekStart) weekly += order.total;
-      monthly += order.total;
-    });
+    // Calcular métricas de vendas
+    const salesMetrics = {
+      daily: this.calculateTotalSales(orders, startOfDay),
+      weekly: this.calculateTotalSales(orders, startOfWeek),
+      monthly: this.calculateTotalSales(orders, startOfMonth),
+    };
+
+    // Calcular métricas de receita
+    const revenueMetrics = {
+      totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
+      averageOrderValue:
+        orders.length > 0
+          ? orders.reduce((sum, order) => sum + order.total, 0) / orders.length
+          : 0,
+      orderCount: orders.length,
+    };
 
     return {
-      salesMetrics: { daily, weekly, monthly },
-      orderMetrics: orders,
-      revenueMetrics: {
-        totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
-        averageOrderValue: orders.reduce((sum, order) => sum + order.total, 0) / orders.length || 0,
-        orderCount: orders.length
-      }
+      salesMetrics,
+      orders,
+      revenueMetrics,
     };
+  }
+
+  private static calculateTotalSales(
+    orders: IOrder[],
+    startDate: Date
+  ): number {
+    return orders
+      .filter((order) => order.createdAt >= startDate)
+      .reduce((sum, order) => sum + order.total, 0);
   }
 }
